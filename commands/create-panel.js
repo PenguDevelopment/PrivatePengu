@@ -30,6 +30,9 @@ module.exports = {
             { name: 'Navy', value: 'navy' },
         )),
     async execute(interaction) {
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+        }
         const panelName = interaction.options.getString('panel-name');
         const panelDescription = interaction.options.getString('panel-description');
         const panelColor = interaction.options.getString('panel-color');

@@ -11,6 +11,9 @@ module.exports = {
                 .addStringOption(option => option.setName('panel-name').setDescription('The name of the panel.').setRequired(true))
 ),
     async execute(interaction) {
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+        }
         // get panel name and subcommand
         const subcommand = interaction.options.getSubcommand();
         if (subcommand === 'panel') {

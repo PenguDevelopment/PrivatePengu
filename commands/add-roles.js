@@ -9,6 +9,9 @@ module.exports = {
         .addRoleOption(option => option.setName('role').setDescription('The role to add to the panel.').setRequired(true))
         .addStringOption(option => option.setName('emoji').setDescription('The emoji to add to the panel.').setRequired(true)),
         async execute(interaction) {
+            if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+                return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            }
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
             // check if have permission
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {

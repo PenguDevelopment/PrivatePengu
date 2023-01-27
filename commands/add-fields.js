@@ -10,6 +10,9 @@ module.exports = {
         .addStringOption(option => option.setName('field-value').setDescription('The value of the field.').setRequired(true))
         .addBooleanOption(option => option.setName('inline').setDescription('Whether the field is inline or not.').setRequired(true)),
     async execute(interaction) {
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+        }
         var randomColor = Math.floor(Math.random()*16777215).toString(16);
         const panelName = interaction.options.getString('panel-name');
         const fieldName = interaction.options.getString('field-name');

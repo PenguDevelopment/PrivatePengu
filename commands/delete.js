@@ -29,6 +29,9 @@ module.exports = {
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
         if (subcommand === 'panel') {
+            if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+                return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            }
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
             const panelName = interaction.options.getString('panel');
             const guild = interaction.guild;
