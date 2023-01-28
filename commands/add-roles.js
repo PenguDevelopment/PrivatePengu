@@ -13,10 +13,6 @@ module.exports = {
                 return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
             }
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
-            // check if have permission
-            if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
-            }
             const panelName = interaction.options.getString('panel-name');
             const role = interaction.options.getRole('role');
             let emoji = interaction.options.getString('emoji');
