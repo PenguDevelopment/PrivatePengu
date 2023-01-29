@@ -25,6 +25,7 @@ client.on('ready', async () => {
 	});
 	console.log(`${chalk.green("Success! ✔")} We are connected to the ${chalk.yellow("database")}!`);
 });
+
 client.on('messageReactionAdd', async (reaction, user) => {
 	if (user.bot) return;
 	const guild = reaction.message.guild;
@@ -51,6 +52,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 		}
 	}
 });
+
 client.on('messageReactionRemove', async (reaction, user) => {
 	const guild = reaction.message.guild;
 	if (user.bot) return;
@@ -79,8 +81,10 @@ client.on('messageReactionRemove', async (reaction, user) => {
 		}
 	}
 })
+
 const Leave = require('./events/leave.js');
 Leave.init(client);
+
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
