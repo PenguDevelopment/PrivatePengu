@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
 const selfroles = require( '../selfroles-schema.js');
 const achivment = require( '../achivment-schema.js');
 

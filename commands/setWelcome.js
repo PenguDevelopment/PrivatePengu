@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
 const Welcome = require('../welcome-schema.js');
 module.exports = {
     data: new SlashCommandBuilder()
@@ -33,6 +33,10 @@ module.exports = {
         .addBooleanOption(option => option.setName('mention').setDescription('Do you want a mention on the outside of the embed?').setRequired(true)),
     async execute(interaction) {
         var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+        if (!interaction.member.permissions.has(PermissionsBitField.FLAGS.ADMINISTRATOR)) {
+            return interaction.reply({ content: 'You do not have permission to use this command', ephemeral: true });
+        }
+        
         const channel = interaction.options.getString('channel');
         const title = interaction.options.getString('title');
         async function colorSorter(color) {
