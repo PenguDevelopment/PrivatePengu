@@ -18,11 +18,11 @@ module.exports = {
         const fieldName = interaction.options.getString('field-name');
         const fieldValue = interaction.options.getString('field-value');
         const inline = interaction.options.getBoolean('inline');
-        const guild = interaction.guild;
+        const guild = interaction.guild.id;
         // find panel
-        const panel = await selfroles.findOne({ guild });
+        const panel = await selfroles.findOne({ guild, 'panels.panelName': panelName });
         if (!panel) {
-            return await interaction.reply({ content: `No panels exist for this server.`, ephemeral: true });
+            return await interaction.reply({ content: `That panel does not exist.`, ephemeral: true });
         }
         let targetPanel;
         for(let i = 0; i< panel.panels.length; i++) {

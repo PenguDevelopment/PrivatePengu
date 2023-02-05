@@ -36,11 +36,11 @@ module.exports = {
             const panelName = interaction.options.getString('panel');
             const guild = interaction.guild;
             // find panel and delete it
-            const panel = await selfroles.findOne({ guild });
+            const panel = await selfroles.findOne({ guild, 'panels.panelName': panelName });
             if (!panel) {
                 const errorEmbed = new EmbedBuilder()
                     .setTitle('Error!')
-                    .setDescription(`No panels exist for this server.`)
+                    .setDescription(`That panel does not exist.`)
                     .setColor(randomColor);
                 return await interaction.reply({ embeds: [errorEmbed] });
             }

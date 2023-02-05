@@ -86,6 +86,25 @@ module.exports = {
             }
 
         }
+        // if already exist
+        const alreadyExist = await selfroles.findOne({
+            guildID: guild.id,
+            panels: {
+                $elemMatch: {
+                    panelName: panelName,
+                }
+            }
+        });
+        if (alreadyExist) {
+            var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+            const embed = new EmbedBuilder()
+                .setTitle('Panel already exists!')
+                .setDescription('A panel with that name already exists! Please choose a different name.')
+                .setColor(randomColor)
+                .setTimestamp()
+            return await interaction.reply({ embeds: [embed] });
+        }
+
         const panelEmbed = new EmbedBuilder()
             .setTitle('Successfully created panel!')
             .setDescription(`Remember that your panel name is \`${panelName}\`! Youll need it to add roles to your panel! Run the \`/add-role\` command to add roles to your panel!`)

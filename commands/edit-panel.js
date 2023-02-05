@@ -22,17 +22,21 @@ module.exports = {
             const panelName = interaction.options.getString('panel-name');
             // find panel
             const guild = interaction.guild;
-            const panel = await selfroles.findOne({ guild });
+
+            const panel = await selfroles.findOne({ guild, 'panels.panelName': panelName });
+
             if (!panel) {
-                return await interaction.reply({ content: `No panels exist for this server.`, ephemeral: true });
+                return await interaction.reply({ content: `The panel \`${panelName}\` does not exist.`, ephemeral: true });
             }
-            let targetPanel;
-            for(let i = 0; i< panel.panels.length; i++) {
-                if(panel.panels[i].panelName === panelName) {
-                    targetPanel = panel.panels[i];
-                    break;
-                }
+
+            const targetPanels = panel.panels.filter(p => p.panelName.toLowerCase() === panelName.toLowerCase());
+
+            if (targetPanels.length === 0) {
+                return await interaction.reply({ content: `The panel \`${panelName}\` does not exist.`, ephemeral: true });
             }
+            
+            const targetPanel = targetPanels[0];
+            
             if(!targetPanel) {
                 return await interaction.reply({ content: `The panel \`${panelName}\` does not exist.`, ephemeral: true });
             }

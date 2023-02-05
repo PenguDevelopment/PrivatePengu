@@ -18,9 +18,9 @@ module.exports = {
             let emoji = interaction.options.getString('emoji');
             const guild = interaction.guild;
             // find panel
-            const panel = await selfroles.findOne({ guild });
+            const panel = await selfroles.findOne({ guild, 'panels.panelName': panelName });
             if (!panel) {
-                return await interaction.reply({ content: `No panels exist for this server.`, ephemeral: true });
+                return await interaction.reply({ content: `That panel does not exist..`, ephemeral: true });
             }
             let targetPanel;
             for(let i = 0; i< panel.panels.length; i++) {
