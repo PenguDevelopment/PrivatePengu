@@ -21,9 +21,9 @@ module.exports = {
             // get the panel name (how this is going to work is basicly the bot will send a message with all the fields and then you can edit them)
             const panelName = interaction.options.getString('panel-name');
             // find panel
-            const guild = interaction.guild;
+            const guild = interaction.guild.id;
 
-            const panel = await selfroles.findOne({ guild, 'panels.panelName': panelName });
+            const panel = await selfroles.findOne({ guildID: guild });
 
             if (!panel) {
                 return await interaction.reply({ content: `The panel \`${panelName}\` does not exist.`, ephemeral: true });

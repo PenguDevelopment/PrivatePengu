@@ -15,11 +15,11 @@ module.exports = {
         }
         const panelName = interaction.options.getString('panel-name');
         const channel = interaction.options.getChannel('channel');
-        const guild = interaction.guild;
+        const guild = interaction.guild.id;
         // find panel
-        const panel = await selfroles.findOne({ guild, 'panels.panelName': panelName });
+        const panel = await selfroles.findOne({ guildID: guild });
         if (!panel) {
-            return await interaction.reply({ content: `That panel does not exist.`, ephemeral: true });
+            return await interaction.reply({ content: `You have no panels in your server.`, ephemeral: true });
         }
         let targetPanel;
         for(let i = 0; i< panel.panels.length; i++) {

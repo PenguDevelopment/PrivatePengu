@@ -1,4 +1,4 @@
-const { Events, User } = require('discord.js');
+const { Events} = require('discord.js');
 const suggest = require('../suggestions-schema.js');
 const { EmbedBuilder } = require('discord.js');
 const { ButtonBuilder } = require('discord.js');
@@ -6,6 +6,7 @@ const { ActionRowBuilder } = require('discord.js');
 var randomColor = Math.floor(Math.random()*16777215).toString(16);
 const guilds = require('../guild-schema.js');
 const verify = require('../verify-schema.js');
+const linkSchema = require('../links-schema.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -274,6 +275,40 @@ module.exports = {
 		const embed = new EmbedBuilder()
 			.setTitle('Congrats!')
 			.setDescription('You have been verified! You can now access the server!')
+			.setColor(randomColor)
+		await interaction.reply({ embeds: [embed], ephemeral: true });
+	} else if (interaction.isButton() && interaction.customId.startsWith("get-link")) {
+		const guild = interaction.guild.id;
+		const linkName = interaction.customId.split('-')[2];
+		const link = await linkSchema.findOne({ guildID: guild });
+		if (!link) {
+			const embed = new EmbedBuilder()
+				.setTitle('Error!')
+				.setDescription('There are no links set up for this server.')
+				.setColor(randomColor)
+			return interaction.reply({ embeds: [embed], ephemeral: true });
+		}
+		// get the links from link panel
+		var targetLink;
+		for (let i = 0; i < link.links.length; i++) {
+			if (link.links[i].linkName === linkName) {
+				targetLink = link.links[i];
+			}
+		}
+
+		if (!targetLink) {
+			const embed = new EmbedBuilder()
+				.setTitle('Error!')
+				.setDescription('That link does not exist.')
+				.setColor(randomColor)
+			return interaction.reply({ embeds: [embed], ephemeral: true });
+		}
+		const links = targetLink.links;
+		const randomLink = links[Math.floor(Math.random() * links.length)].link;
+		
+		const embed = new EmbedBuilder()
+			.setTitle('Here is your link!')
+			.setDescription(`${randomLink}`)
 			.setColor(randomColor)
 		await interaction.reply({ embeds: [embed], ephemeral: true });
 	}

@@ -14,22 +14,7 @@ const schema = new Schema({
             type: String,
             required: true
         },
-        type: {
-            type: String,
-            required: true
-        },
-        amount: {
-            type: Number,
-            required: true
-        },
-        role: {
-            type: String,
-            required: true
-        },
-        reward: {
-            type: String,
-            required: true
-        }
+        requirements: []
     }]
 });
 

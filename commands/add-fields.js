@@ -20,9 +20,9 @@ module.exports = {
         const inline = interaction.options.getBoolean('inline');
         const guild = interaction.guild.id;
         // find panel
-        const panel = await selfroles.findOne({ guild, 'panels.panelName': panelName });
+        const panel = await selfroles.findOne({ guildID: guild });
         if (!panel) {
-            return await interaction.reply({ content: `That panel does not exist.`, ephemeral: true });
+            return await interaction.reply({ content: `There are no panels in your guild.`, ephemeral: true });
         }
         let targetPanel;
         for(let i = 0; i< panel.panels.length; i++) {

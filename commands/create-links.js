@@ -1,12 +1,12 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
-const selfroles = require('../selfroles-schema.js');
+const linksSchema = require('../links-schema.js');
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('create-panel')
-        .setDescription('Create a self-role panel for your server.')
-        .addStringOption(option => option.setName('panel-name').setDescription('The name of the panel. (Remember this name! You\'ll need it to add roles!)').setRequired(true))
-        .addStringOption(option => option.setName('panel-description').setDescription('The description of the panel.').setRequired(true))
-        .addStringOption(option => option.setName('panel-color').setDescription('The color of the panel.').setRequired(true).addChoices(
+        .setName('create-link')
+        .setDescription('Create a link dispenser for your server.')
+        .addStringOption(option => option.setName('link-name').setDescription('The name of the link dispenser. (Remember this name! You\'ll need it to add links!)').setRequired(true))
+        .addStringOption(option => option.setName('link-description').setDescription('The description of the link dispenser.').setRequired(true))
+        .addStringOption(option => option.setName('link-color').setDescription('The color of the link dispenser.').setRequired(true).addChoices(
             { name: 'Random', value: 'random' },
             { name: 'Red', value: 'red' },
             { name: 'Green', value: 'green' },
@@ -28,15 +28,17 @@ module.exports = {
             { name: 'Maroon', value: 'maroon' },
             { name: 'Olive', value: 'olive' },
             { name: 'Navy', value: 'navy' },
-        )),
+        ))
+        .addIntegerOption(option => option.setName('link-limit').setDescription('The number of links a person can get per month.').setRequired(false)),
     async execute(interaction) {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
         }
-        const panelName = interaction.options.getString('panel-name');
-        const panelDescription = interaction.options.getString('panel-description');
-        const panelColor = interaction.options.getString('panel-color');
-        const guild = await interaction.guild;
+        const linkName = interaction.options.getString('link-name');
+        const linkDescription = interaction.options.getString('link-description');
+        const linkColor = interaction.options.getString('link-color');
+        const linkLimit = interaction.options.getInteger('link-limit') ? interaction.options.getInteger('link-limit') : "none";
+        const guild = await interaction.guild.id;
         var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
         function colorSorter(color) {
             // change color to hex
@@ -87,43 +89,43 @@ module.exports = {
 
         }
         // if already exist
-        const alreadyExist = await selfroles.findOne({
-            guildID: guild.id,
-            panels: {
+        const alreadyExist = await linksSchema.findOne({
+            guildID: guild,
+            links: {
                 $elemMatch: {
-                    panelName: panelName,
+                    linkName: linkName,
                 }
             }
         });
         if (alreadyExist) {
             var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
             const embed = new EmbedBuilder()
-                .setTitle('Panel already exists!')
-                .setDescription('A panel with that name already exists! Please choose a different name.')
+                .setTitle('Link dispenser already exists!')
+                .setDescription('A link dispenser with that name already exists! Please choose a different name.')
                 .setColor(randomColor)
                 .setTimestamp()
             return await interaction.reply({ embeds: [embed] });
         }
 
-        const panelEmbed = new EmbedBuilder()
-            .setTitle('Successfully created panel!')
-            .setDescription(`Remember that your panel name is \`${panelName}\`! You\'ll need it to add roles to your panel! Run the \`/add-role\` command to add roles to your panel!`)
-            .setColor(colorSorter(panelColor))
+        const linkEmbed = new EmbedBuilder()
+            .setTitle('Successfully created link dispenser!')
+            .setDescription(`Remember that your link dispenser name is \`${linkName}\`! You\'ll need it to add roles to your link dispenser! Run the \`/add-links\` command to add links to your link dispenser!`)
+            .setColor(colorSorter(linkColor))
             .setTimestamp()
-        await interaction.reply({ embeds: [panelEmbed] });
-        await selfroles.findOneAndUpdate(
+        await interaction.reply({ embeds: [linkEmbed] });
+        await linksSchema.findOneAndUpdate(
             {
-                guildID: guild.id,
+                guildID: guild,
             },
             {
-                guildID: guild.id,
+                guildID: guild,
                 $push: {
-                    panels: {
-                        panelName: panelName,
-                        panelDescription: panelDescription,
-                        panelColor: panelColor,
-                        roles: [],
-                        fields: [],
+                    links: {
+                        linkName: linkName,
+                        linkDescription: linkDescription,
+                        linkColor: linkColor,
+                        linkLimit: linkLimit,
+                        links: [],
                     }
                 }
             },
