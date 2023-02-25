@@ -1,7 +1,7 @@
 // Require the necessary discord.js classes
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
 require('dotenv').config();
 const { Collection } = require('discord.js')
 const selfroles = require('./selfroles-schema.js');
@@ -15,7 +15,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds,
 	GatewayIntentBits.MessageContent,
 	GatewayIntentBits.GuildMembers,
 	GatewayIntentBits.GuildMessageReactions
-] });
+ ], partials: [Partials.Message, Partials.Channel, Partials.Reaction] });
 
 client.commands = new Collection();
 
@@ -27,6 +27,16 @@ client.on('ready', async () => {
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
+	if (reaction.partial) {
+		// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message:', error);
+			// Return as `reaction.message.author` may be undefined/null
+			return;
+		}
+	}
 	if (user.bot) return;
 	const guild = reaction.message.guild;
 	// find panel
@@ -54,6 +64,16 @@ client.on('messageReactionAdd', async (reaction, user) => {
 });
 
 client.on('messageReactionRemove', async (reaction, user) => {
+	if (reaction.partial) {
+		// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message:', error);
+			// Return as `reaction.message.author` may be undefined/null
+			return;
+		}
+	}
 	const guild = reaction.message.guild;
 	if (user.bot) return;
 	// find panel

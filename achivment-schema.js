@@ -14,6 +14,10 @@ const schema = new Schema({
             type: String,
             required: true
         },
+        reward: {
+            type: String,
+            required: true
+        },
         requirements: []
     }]
 });

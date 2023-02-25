@@ -5,7 +5,8 @@ module.exports = {
     .setName('create-achievement')
     .setDescription('Create an achievement that is available to get.')
     .addStringOption(option => option.setName('name').setDescription('The name of the achievement.').setRequired(true))
-    .addStringOption(option => option.setName('description').setDescription('The description of the achievement.').setRequired(true)),
+    .addStringOption(option => option.setName('description').setDescription('The description of the achievement.').setRequired(true))
+    .addRoleOption(option => option.setName('reward').setDescription('The reward for the achievement.').setRequired(true)),
     async execute(interaction) {
     var randomColor = Math.floor(Math.random()*16777215).toString(16);
     // check if have permission
@@ -14,6 +15,7 @@ module.exports = {
     }
     const name = interaction.options.getString('name');
     const description = interaction.options.getString('description');
+    const reward = interaction.options.getRole('reward');
 
     const guild = interaction.guild;
     // first find out if the achievement already exists
@@ -44,6 +46,7 @@ module.exports = {
             achievements: {
               name: name,
               description: description,
+              reward: reward,
               requirements: [],
             }
           }

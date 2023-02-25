@@ -1,93 +1,130 @@
-const discord = require('discord.js');
-const { EmbedBuilder } = require('discord.js');
-const achivment = require('../achivment-schema.js');
-const personalAchivment = require('../personal-achivment-schema.js');
+const { EmbedBuilder, Events } = require('discord.js');
+const AchivmentModel = require('../achivment-schema.js');
+const PersonalAchivmentModel = require('../personal-achivment-schema.js');
 
-module.exports = { 
-    name : discord.Events.MessageCreate, 
-    async execute(message) {
-    var randomColor = Math.floor(Math.random()*16777215).toString(16);
+module.exports = {
+  name: Events.MessageCreate,
+  async execute(message) {
     if (message.author.bot) return;
-    if (!message.guild) return;
-    const guild = message.guild;
-    const achivments = await achivment.findOne({ guildID: guild.id });
-    if (!achivments) return;
-    const achivmentList = achivments.achievements;
-    if (!achivmentList) return;
-    for (const achivment of achivmentList) {
-        if (achivment.type === 'message') {
-            let personalAchivments = await personalAchivment.findOne({ guildID: guild.id, userId: message.author.id });
-            if (personalAchivments == null) {
-                // Create new personal achivment
-                const newPersonalAchivment = new personalAchivment({
-                    guildID: guild.id,
-                    userId: message.author.id,
-                    stats: {
-                        messages: 1,
-                        completed: []
+    if (message.channel.type === 'DM') return;
+    const achievements = await AchivmentModel.findOne({ guildID: message.guild.id });
+    if (!achievements) return;
+
+    let personalAchievement = await PersonalAchivmentModel.findOne({
+        guildID: message.guild.id,
+        userId: message.author.id
+    });
+    let randomColor = Math.floor(Math.random() * 16777215).toString(16);
+    if (!personalAchievement) {
+        let newPersonalAchievement = new PersonalAchivmentModel({
+            guildID: message.guild.id,
+            userId: message.author.id,
+            achievements: [],
+            stats: {
+                messages: 0,
+                reactions: 0,
+                voice: 0,
+                boosts: 0,
+                invites: 0,
+                roleNumber: 0,
+            },
+        });
+        await newPersonalAchievement.save();
+        personalAchievement = newPersonalAchievement;
+    };
+    // update stats with +1 messages
+    await PersonalAchivmentModel.findOneAndUpdate(
+        {
+            guildID: message.guild.id,
+            userId: message.author.id,
+        },
+        {
+            $inc: {
+                'stats.messages': 1,
+            },
+        }
+    );
+
+    for (let achievement of achievements.achievements) {
+        let hasAchievement = false;
+        for (let i = 0; i < personalAchievement.achievements.length; i++) {
+            if (personalAchievement.achievements[i].name === achievement.name) {
+                hasAchievement = true;
+                break;
+            }
+        }
+        if (!hasAchievement) {
+            let requirementsMet = true;
+            if (achievement.requirements.length === 0) continue;
+            for (let i = 0; i < achievement.requirements.length; i++) {
+                let requirement = achievement.requirements[i];
+                if (requirement.type === 'messages') {
+                    if (personalAchievement.stats.messages < requirement.amount) {
+                        requirementsMet = false;
+                        break;
+                    }
+                }
+                if (requirement.type === 'reactions') {
+                    if (personalAchievement.stats.reactions < requirement.amount) {
+                        requirementsMet = false;
+                        break;
+                    }
+                }
+                if (requirement.type === 'voice') {
+                    if (personalAchievement.stats.voice < requirement.amount) {
+                        requirementsMet = false;
+                        break;
+                    }
+                }
+                if (requirement.type === 'boosts') {
+                    if (personalAchievement.stats.boosts < requirement.amount) {
+                        requirementsMet = false;
+                        break;
+                    }
+                }
+                if (requirement.type === 'invites') {
+                    if (personalAchievement.stats.invites < requirement.amount) {
+                        requirementsMet = false;
+                        break;
+                    }
+                }
+                if (requirement.type === 'roleNumber') {
+                    //check how many roles the user has
+                    let roleNumber = 0;
+                    for (let i = 0; i < message.member.roles.cache.size; i++) {
+                        roleNumber++;
+                    }
+                    if (roleNumber < requirement.amount) {
+                        requirementsMet = false;
+                        break;
+                    }
+                }
+            }
+            if (requirementsMet) {
+                await PersonalAchivmentModel.findOneAndUpdate(
+                    {
+                        guildID: message.guild.id,
+                        userId: message.author.id,
                     },
-                });
-                await newPersonalAchivment.save();
-                personalAchivments = await personalAchivment.findOne({ guildID: guild.id, userID: message.author.id });
-                continue;
-            };
-            const stats = personalAchivments.stats;
-            if (!stats) return;
-            let messages = stats.map(stat => stat.messages);
-            messages = messages[0];
-            if (!messages) return;
-            if (messages >= achivment.amount && !stats.map(stat => stat.completed).includes(achivment.name)) {
-                const role = guild.roles.cache.find(role => role.id === achivment.reward);
-                if (!role) return;
-                const member = guild.members.cache.find(member => member.id === message.author.id);
-                if (!member) return;
-                await member.roles.add(role);
+                    {
+                        $push: {
+                            achievements: {
+                                name: achievement.name,
+                                description: achievement.description,
+                                reward: achievement.reward,
+                            },
+                        },
+                    }
+                );
                 const embed = new EmbedBuilder()
-                    .setTitle('Achievement Completed!')
-                    .setDescription(`Congratulations! You have completed the achievement: \`${achivment.name}\`!`)
+                    .setTitle(`New achievement!`)
+                    .setDescription(`You have unlocked the achievement: **${achievement.name}**!`)
                     .setColor(randomColor)
-                    .addFields(
-                        { name: 'Description', value: `\`${achivment.description}\``},
-                        { name: 'Reward', value: `\`${role.name}\``}
-                    )
                     .setTimestamp()
                 await message.channel.send({ embeds: [embed] });
-                // add achivment to completed
-                await personalAchivment.findOneAndUpdate(
-                    {
-                        guildID: guild.id,
-                        userId: message.author.id
-                    },
-                    {
-                        guildID: guild.id,
-                        userId: message.author.id,
-                        stats: {
-                            $push: { "completed": achivment.name },
-                        }
-                    },
-                    {
-                        upsert: true
-                    }
-                );
-            } else {
-                await personalAchivment.findOneAndUpdate(
-                    {
-                        guildID: guild.id,
-                        userId: message.author.id
-                    },
-                    {
-                        guildID: guild.id,
-                        userID: message.author.id,
-                        stats: {
-                            messages: messages + 1
-                        }
-                    },
-                    {
-                        upsert: true
-                    }
-                );
             }
         }
     }
-}
-}
+  }
+};
+

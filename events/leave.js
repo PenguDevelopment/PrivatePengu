@@ -1,6 +1,7 @@
 const discord = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
 const Leave = require('../leave-schema.js');
+const selfroles = require('../selfroles-schema.js');
 
 module.exports = {
     name: discord.Events.GuildMemberRemove,
@@ -33,6 +34,7 @@ module.exports = {
             for (const guild of guilds.values()) {
                 await guild.members.fetch();
             }
+            console.log("Fetched all members.")
         });
     }
 }
