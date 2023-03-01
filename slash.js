@@ -23,8 +23,9 @@ const rest = new REST({ version: '10' }).setToken(token);
 
 // and deploy your commands!
 (async () => {
-  try {
-    console.log(`Started refreshing ${chalk.red(`${commands.length}`)} application (/) commands.`);
+	try {
+		// blue is better
+		console.log(`Started refreshing ${chalk.blue(`${commands.length}`)} application (/) commands.`);
 
     // The put method is used to fully refresh all commands in the guild with the current set
     const data = await rest.put(
