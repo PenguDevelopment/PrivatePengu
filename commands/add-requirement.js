@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
 const achivment = require( '../achivment-schema.js');
 module.exports = {
-    data : new SlashCommandBuilder()
+    data: new SlashCommandBuilder()
     .setName('add-requirement')
     .setDescription('Add a requirement to an achievement.')
     .addStringOption(option => option.setName('name').setDescription('The name of the achievement.').setRequired(true)),

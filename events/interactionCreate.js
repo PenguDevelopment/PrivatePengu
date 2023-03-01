@@ -7,6 +7,8 @@ var randomColor = Math.floor(Math.random()*16777215).toString(16);
 const guilds = require('../guild-schema.js');
 const verify = require('../verify-schema.js');
 const linkSchema = require('../links-schema.js');
+const personalLinkSchema = require('../personallink-schema.js');
+
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -287,6 +289,36 @@ module.exports = {
 				.setDescription('There are no links set up for this server.')
 				.setColor(randomColor)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
+		}
+		let personalLinkUser = await personalLinkSchema.findOne({ guildID: guild, userId: interaction.user.id });
+		if (!personalLinkUser) {
+			// create a new user
+			const newLinkUser = new personalLinkSchema({
+				guildID: guild,
+				userId: interaction.user.id,
+				linksThisMonth: 0,
+			});
+			await newLinkUser.save();
+			personalLinkUser = newLinkUser;
+		}
+		// check if they have reached the limit
+		if (personalLinkUser.linksThisMonth >= link.limit) {
+			const embed = new EmbedBuilder()
+				.setTitle('Error!')
+				.setDescription(`You have reached the limit of ${link.limit} links this month.`)
+				.setColor(randomColor)
+			return interaction.reply({ embeds: [embed], ephemeral: true });
+		} else {
+			// check what day it is and if it is the first of the month
+			const today = new Date();
+			if (today.getDate() === 1) {
+				// reset the links
+				personalLinkUser.linksThisMonth = 0;
+				await personalLinkUser.save();
+			}
+			// add 1 to the links
+			personalLinkUser.linksThisMonth += 1;
+			await personalLinkUser.save();
 		}
 		// get the links from link panel
 		var targetLink;
