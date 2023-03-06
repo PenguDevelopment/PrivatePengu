@@ -6,7 +6,7 @@ const schema = new mongoose.Schema({
         required: true
     },
     roles: [],
-    boost:[]
+    boosts:[]
 });
 
 module.exports = mongoose.model('alert', schema, 'alert');
