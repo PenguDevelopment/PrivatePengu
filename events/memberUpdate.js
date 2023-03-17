@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder } = require('discord.js');
+/* const { Events, EmbedBuilder } = require('discord.js');
 const alertSchema = require('../alert-schema.js');
 
 module.exports = {
@@ -76,4 +76,4 @@ module.exports = {
             }
         }
 }
-}
+} */
