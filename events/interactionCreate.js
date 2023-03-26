@@ -8,6 +8,7 @@ const guilds = require('../guild-schema.js');
 const verify = require('../verify-schema.js');
 const linkSchema = require('../links-schema.js');
 const personalLinkSchema = require('../personallink-schema.js');
+const { Emojis, Colors, EmojiIds } = require('../statics.js')
 
 
 module.exports = {
@@ -34,9 +35,9 @@ module.exports = {
 		const suggestion = await suggest.findOne({ id: id });
 		if (!suggestion) {
 			const embed = new EmbedBuilder()
-				.setTitle('Error!')
+				//.setTitle('Error!')
 				.setDescription('That suggestion does not exist.')
-				.setColor(randomColor)
+				.setColor(Colors.normal)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		} else {
 			if (vote === 'yes') {
@@ -47,9 +48,8 @@ module.exports = {
 				if (find) {
 					if (action == find.type) {
 						const embed = new EmbedBuilder()
-							.setTitle('Error!')
-							.setDescription('You already voted on this suggestion.')
-							.setColor(randomColor)
+							.setDescription(Emojis.error + ' You already voted on this suggestion.')
+							.setColor(Colors.error)
 						return interaction.reply({ embeds: [embed], ephemeral: true });
 					} else if (action == 'yes' && find.type == 'no') {
 						newVotes.no = newVotes.no - 1;
@@ -64,20 +64,23 @@ module.exports = {
 						new ButtonBuilder()
 							.setCustomId(`sug-${id}-yes`)
 							.setLabel(`${newVotes.yes}`)
-							.setEmoji('👍')
+							.setEmoji(EmojiIds.success)
 							.setStyle(3),
 						new ButtonBuilder()
 							.setCustomId(`sug-${id}-no`)
+
+
+
 							.setLabel(`${newVotes.no}`)
-							.setEmoji('👎')
+							.setEmoji(EmojiIds.error)
 							.setStyle(4),
 					);
 				const message = await interaction.channel.messages.fetch(suggestion.messageId);
 				if (!message) {
 					const embed = new EmbedBuilder()
-						.setTitle('Error!')
+						//.setTitle('Error!')
 						.setDescription('That suggestion does not exist.')
-						.setColor(randomColor)
+						.setColor(Emojis.error)
 					return interaction.reply({ embeds: [embed], ephemeral: true });
 				}
 				await message.edit({ components: [row] });
@@ -90,9 +93,9 @@ module.exports = {
 				if (find) {
 					if (action == find.type) {
 						const embed = new EmbedBuilder()
-							.setTitle('Error!')
-							.setDescription('You already voted on this suggestion.')
-							.setColor(randomColor)
+							// .setTitle('Error!')
+							.setDescription(Emojis.error + ' You\'ve already voted for this suggestion.')
+							.setColor(Colors.error)
 						return interaction.reply({ embeds: [embed], ephemeral: true });
 					} else if (action == 'no' && find.type == 'yes') {
 						newVotes.yes = newVotes.yes - 1;
@@ -107,12 +110,12 @@ module.exports = {
 						new ButtonBuilder()
 							.setCustomId(`sug-${id}-yes`)
 							.setLabel(`${newVotes.yes}`)
-							.setEmoji('👍')
+							.setEmoji(EmojiIds.success)
 							.setStyle(3),
 						new ButtonBuilder()
 							.setCustomId(`sug-${id}-no`)
 							.setLabel(`${newVotes.no}`)
-							.setEmoji('👎')
+							.setEmoji(EmojiIds.error)
 							.setStyle(4),
 					);
 				const message = await interaction.channel.messages.fetch(suggestion.messageId);
@@ -120,7 +123,7 @@ module.exports = {
 					const embed = new EmbedBuilder()
 						.setTitle('Error!')
 						.setDescription('That suggestion does not exist.')
-						.setColor(randomColor)
+						.setColor(Colors.normal)
 					return interaction.reply({ embeds: [embed], ephemeral: true });
 				}
 				await message.edit({ components: [row] });
@@ -132,7 +135,7 @@ module.exports = {
 						const embed = new EmbedBuilder()
 							.setTitle('Error!')
 							.setDescription('That suggestion does not exist.')
-							.setColor(randomColor)
+							.setColor(Colors.normal)
 						return interaction.reply({ embeds: [embed], ephemeral: true });
 					}
 					const reviewmessage = await interaction.channel.messages.fetch(suggestion.reviewMessageId);
@@ -140,7 +143,7 @@ module.exports = {
 						const embed = new EmbedBuilder()
 							.setTitle('Error!')
 							.setDescription('That suggestion does not exist.')
-							.setColor(randomColor)
+							.setColor(Colors.normal)
 						return interaction.reply({ embeds: [embed], ephemeral: true });
 					}
 					// get channel from guild
@@ -157,13 +160,13 @@ module.exports = {
 						.setDescription(suggestion.suggestion)// set avatar image as author
 						.setAuthor({ name: `New Suggestion!`, iconURL: user.user.displayAvatarURL({ dynamic: true }) })
 						.setTimestamp()
-						.setColor(randomColor)
+						.setColor(Colors.normal)
 					const embed2 = new EmbedBuilder()
 						.setTitle('Information')
 						.setAuthor({ name: "New Suggestion!", iconURL: user.user.avatarURL({ dynamic: true })})
 						.setDescription(`Suggestion By: <@${user.user.id}>`)
 						.addFields({ name: 'Suggestion:', value: `${suggestion.suggestion}` })
-						.setColor(randomColor)
+						.setColor(Colors.normal)
 						.setTimestamp()
 					const row = new ActionRowBuilder()
 						.addComponents(
@@ -186,13 +189,13 @@ module.exports = {
 							new ButtonBuilder()
 								.setCustomId(`sug-${id}-yes`)
 								.setLabel(`${suggestion.votes.yes}`)
-								.setEmoji('👍')
-								.setStyle(3),
+								.setEmoji(EmojiIds.success)
+								.setStyle(2),
 							new ButtonBuilder()
 								.setCustomId(`sug-${id}-no`)
 								.setLabel(`${suggestion.votes.no}`)
-								.setEmoji('👎')
-								.setStyle(4)
+								.setEmoji(EmojiIds.error)
+								.setStyle(2)
 						);
 					await suggestionChannel.send({ embeds: [embed], components: [row1] });
 					const msg = await suggestionChannel.messages.fetch({ limit: 1 });
@@ -206,7 +209,7 @@ module.exports = {
 						const embed = new EmbedBuilder()
 							.setTitle('Error!')
 							.setDescription('That suggestion does not exist.')
-							.setColor(randomColor)
+							.setColor(Colors.normal)
 						return interaction.reply({ embeds: [embed], ephemeral: true });
 					}
 					const reviewmessage = await interaction.channel.messages.fetch(suggestion.reviewMessageId);
@@ -214,7 +217,7 @@ module.exports = {
 						const embed = new EmbedBuilder()
 							.setTitle('Error!')
 							.setDescription('That suggestion does not exist.')
-							.setColor(randomColor)
+							.setColor(Colors.normal)
 						return interaction.reply({ embeds: [embed], ephemeral: true });
 					}
 					const user = interaction.guild.members.cache.get(suggestion.author);
@@ -226,7 +229,7 @@ module.exports = {
 							{ name: 'Suggestion By:', value: `${user.user.tag}` },
 							{ name: 'Denied at:', value: `${new Date().toLocaleString()}` },
 						)
-					.setColor(randomColor)
+					.setColor(Colors.normal)
 					const row = new ActionRowBuilder()
 						.addComponents(
 							new ButtonBuilder()
@@ -253,7 +256,7 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setTitle('Error!')
 				.setDescription('That verification does not exist.')
-				.setColor(randomColor)
+				.setColor(Colors.normal)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		const message = await interaction.channel.messages.fetch(verifySc.messageId);
@@ -261,7 +264,7 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setTitle('Error!')
 				.setDescription('Somethign went wrong. Ask an admin to delete the verification and make a new one.')
-				.setColor(randomColor)
+				.setColor(Colors.normal)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		// add role to user
@@ -270,14 +273,14 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setTitle('Error!')
 				.setDescription('Role does not exist. Ask an admin to reset the verification system.')
-				.setColor(randomColor)
+				.setColor(Colors.normal)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		await interaction.member.roles.add(role);
 		const embed = new EmbedBuilder()
 			.setTitle('Congrats!')
 			.setDescription('You have been verified! You can now access the server!')
-			.setColor(randomColor)
+			.setColor(Colors.normal)
 		await interaction.reply({ embeds: [embed], ephemeral: true });
 	} else if (interaction.isButton() && interaction.customId.startsWith("get-link")) {
 		const guild = interaction.guild.id;
@@ -287,7 +290,7 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setTitle('Error!')
 				.setDescription('There are no links set up for this server.')
-				.setColor(randomColor)
+				.setColor(Colors.normal)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		let personalLinkUser = await personalLinkSchema.findOne({ guildID: guild, userId: interaction.user.id });
@@ -306,7 +309,7 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setTitle('Error!')
 				.setDescription(`You have reached the limit of ${link.limit} links this month.`)
-				.setColor(randomColor)
+				.setColor(Colors.normal)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		} else {
 			// check what day it is and if it is the first of the month
@@ -332,7 +335,7 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setTitle('Error!')
 				.setDescription('That link does not exist.')
-				.setColor(randomColor)
+				.setColor(Colors.normal)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		const links = targetLink.links;
@@ -341,7 +344,7 @@ module.exports = {
 		const embed = new EmbedBuilder()
 			.setTitle('Here is your link!')
 			.setDescription(`${randomLink}`)
-			.setColor(randomColor)
+			.setColor(Colors.normal)
 		await interaction.reply({ embeds: [embed], ephemeral: true });
 	}
 	},

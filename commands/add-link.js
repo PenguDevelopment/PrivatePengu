@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
 const linksSchema = require( '../links-schema.js');
+const { Emojis, EmojiIds, Colors } = require('../statics.js')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,7 +10,7 @@ module.exports = {
         .addStringOption(option => option.setName('link').setDescription('The link to add to the link dispenser.').setRequired(true)),
         async execute(interaction) {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+                return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command.', ephemeral: true });
             }
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
             const linkName = interaction.options.getString('link-name');
@@ -18,7 +19,7 @@ module.exports = {
             // find panel
             const links = await linksSchema.findOne({ guildID: guild });
             if (!links) {
-                return await interaction.reply({ content: `You have no link dispensers in your server.`, ephemeral: true });
+                return await interaction.reply({ content: Emojis.error + ` This server has no link dispensers active.`, ephemeral: true });
             }
             let targetLink;
             for(let i = 0; i< links.links.length; i++) {
@@ -28,13 +29,13 @@ module.exports = {
                 }
             }
             if(!targetLink) {
-                return await interaction.reply({ content: `The link dispenser \`${linkName}\` does not exist.`, ephemeral: true });
+                return await interaction.reply({ content: Emojis.error + ` The link dispenser \`${linkName}\` does not exist.`, ephemeral: true });
             }
         
             // check if link is already in panel
             for (const link of targetLink.links) {
                 if (link.link === link) {
-                    return await interaction.reply({ content: `The link \`${link}\` already exists in the link dispenser \`${linkName}\`.`, ephemeral: true });
+                    return await interaction.reply({ content: Emojis.error + ` \`${link}\` already exists in \`${linkName}\` dispenser.`, ephemeral: true });
                 }
             }
             
@@ -49,9 +50,9 @@ module.exports = {
                 }
             })
         const successEmbed = new EmbedBuilder()
-            .setTitle('Success!')
-            .setDescription(`Added the link \`${link}\` to the link dispenser \`${linkName}\`.`)
-            .setColor(randomColor);
+            // .setTitle('Success!')
+            .setDescription(`\`${link}\` was added to the link \`${linkName}\` dispenser.`)
+            .setColor(Colors.success);
         await interaction.reply({ embeds: [successEmbed] });
     }
 }

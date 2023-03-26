@@ -40,7 +40,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 	if (user.bot) return;
 	const guild = reaction.message.guild;
 	// find panel
-	let panelName = reaction.message.embeds[0].title;
+	let panelName = reaction.message.embeds[0].title || "";
 	const panel = await selfroles.findOne({ guild });
 	if (!panel) {
 		return;
@@ -77,7 +77,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 	const guild = reaction.message.guild;
 	if (user.bot) return;
 	// find panel
-	let panelName = reaction.message.embeds[0].title;
+	let panelName = reaction.message.embeds[0].title || "";
 	const panel = await selfroles.findOne({
 		guild,
 	});
@@ -133,4 +133,4 @@ for (const file of eventFiles) {
 }
 
 // Log in to Discord with the client's token
-//client.login(token);
+client.login(token);

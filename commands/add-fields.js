@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
 const selfroles = require( '../selfroles-schema.js');
+const { Emojis, Colors } = require('../statics.js')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,7 +12,7 @@ module.exports = {
         .addBooleanOption(option => option.setName('inline').setDescription('Whether the field is inline or not.').setRequired(true)),
     async execute(interaction) {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command.', ephemeral: true });
         }
         var randomColor = Math.floor(Math.random()*16777215).toString(16);
         const panelName = interaction.options.getString('panel-name');
@@ -22,7 +23,7 @@ module.exports = {
         // find panel
         const panel = await selfroles.findOne({ guildID: guild });
         if (!panel) {
-            return await interaction.reply({ content: `There are no panels in your guild.`, ephemeral: true });
+            return await interaction.reply({ content: Emojis.error + ` There are no panels in your guild.`, ephemeral: true });
         }
         let targetPanel;
         for(let i = 0; i< panel.panels.length; i++) {
@@ -32,7 +33,7 @@ module.exports = {
             }
         }
         if(!targetPanel) {
-            return await interaction.reply({ content: `The panel \`${panelName}\` does not exist.`, ephemeral: true });
+            return await interaction.reply({ content: Emojis.error + ` The panel \`${panelName}\` does not exist.`, ephemeral: true });
         }
         // add field with update one
         await selfroles.updateOne({
@@ -49,9 +50,9 @@ module.exports = {
         });
         
         const embed = new EmbedBuilder()
-            .setTitle('Success!')
-            .setDescription(`Added the field \`${fieldName}\` to the panel \`${panelName}\`.`)
-            .setColor(randomColor);
+            // .setTitle('Success!')
+            .setDescription(Emojis.success + ` Added the field \`${fieldName}\` to the panel \`${panelName}\`.`)
+            .setColor(Colors.success);
         await interaction.reply({ embeds: [embed], ephemeral: true });
     }
 }

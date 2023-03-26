@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const guild = require('../guild-schema.js');
 const suggest = require('../suggestions-schema.js');
 const { EmbedBuilder } = require('discord.js');
+const { Emojis, Colors, EmojisIds } = require("../statics.js")
 const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
 var randomColor = Math.floor(Math.random()*16777215).toString(16);
 
@@ -26,25 +27,24 @@ module.exports = {
         var id = genId(8);
         if (!guilds) {
             const embed = new EmbedBuilder()
-                .setTitle('Error!')
-                .setDescription('You must set a suggestion channel before sending a suggestion.')
-                .setColor(randomColor)
+                // .setTitle('Error!')
+                .setDescription(Emojis.error + ' This server does not have suggestions channel set up.')
+                .setColor(Colors.error)
             return interaction.reply({ embeds: [embed], ephemeral: true });
         } else if (!guilds.acceptChannel) {
             const embed = new EmbedBuilder()
-                .setTitle('Error!')
-                .setDescription('You must set a review channel before sending a suggestion.')
-                .setColor(randomColor)
+                .setDescription(Emojis.error + ' You must set a review channel before sending a suggestion.')
+                .setColor(Colors.error)
             return interaction.reply({ embeds: [embed], ephemeral: true });
         } else {
         // get the review channel and send the suggestion there with buttons accept and deny
         const reviewChannel = interaction.guild.channels.cache.get(guilds.acceptChannel);
         const embed = new EmbedBuilder()
-            .setTitle('Information')
-            .setAuthor({ name: "New Suggestion!", iconURL: interaction.user.avatarURL({ dynamic: true })})
+            // .setTitle('Information')
+            .setAuthor({ name: "New Suggestion", iconURL: interaction.user.avatarURL({ dynamic: true })})
             .setDescription(`Suggestion By: <@${interaction.user.id}>`)
             .addFields({ name: 'Suggestion:', value: `${suggestion}` })
-            .setColor(randomColor)
+            .setColor(Colors.normal)
             .setTimestamp()
         const row = new ActionRowBuilder()
             .addComponents(
@@ -62,9 +62,9 @@ module.exports = {
         const msg = await reviewChannel.send({ embeds: [embed], components: [row] });
         // reply success
         const embed2 = new EmbedBuilder()
-            .setTitle('Success!')
-            .setDescription(`Your suggestion has been sent to <#${guilds.acceptChannel}> for review!`)
-            .setColor(randomColor)
+            // .setTitle('Success!')
+            .setDescription(Emojis.success + ` Your suggestion has been submitted for review.`)
+            .setColor(Colors.success)
         await interaction.reply({ embeds: [embed2], ephemeral: true });
         await new suggest({
             id: id,
