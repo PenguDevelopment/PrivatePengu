@@ -40,7 +40,7 @@ module.exports = {
 
     async execute(interaction) {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return await interaction.reply({ content: 'You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
         }
         const subcommand = interaction.options.getSubcommand();
         if (subcommand === 'panel') {
@@ -51,9 +51,9 @@ module.exports = {
             const panel = await selfroles.findOne({ guildID: guild});
             if (!panel) {
                 const errorEmbed = new EmbedBuilder()
-                    .setTitle('Error!')
-                    .setDescription(`You have no panels in your server.`)
-                    .setColor(randomColor);
+                    //.setTitle('Error!')
+                    .setDescription(Emojis.error + ` This guild does not have any panels configured.`)
+                    .setColor(Colors.error);
                 return await interaction.reply({ embeds: [errorEmbed] });
             }
             let targetPanel;
@@ -65,9 +65,9 @@ module.exports = {
             }
             if(!targetPanel) {
                 const errorEmbed = new EmbedBuilder()
-                    .setTitle('Error!')
-                    .setDescription(`The panel \`${panelName}\` does not exist.`)
-                    .setColor(randomColor);
+                    //.setTitle('Error!')
+                    .setDescription(Emojis.error + ` This panel does not exist.`)
+                    .setColor(Colors.error);
                 return await interaction.reply({ embeds: [errorEmbed] });
             }
             await selfroles.updateOne({
@@ -81,9 +81,9 @@ module.exports = {
                 }
             })
             const successEmbed = new EmbedBuilder()
-                .setTitle('Success!')
-                .setDescription(`Deleted the panel \`${panelName}\`.`)
-                .setColor(randomColor);
+                //.setTitle('Success!')
+                .setDescription(Emojis.success + ` Deleted the panel \`${panelName}\`.`)
+                .setColor(Colors.success);
             await interaction.reply({ embeds: [successEmbed] });
         } else if (subcommand === 'achievement') {
             const achivmentName = interaction.options.getString('achievement');
@@ -93,9 +93,9 @@ module.exports = {
             const achievement = await achivment.findOne({ guild });
             if (!achievement) {
                 const errorEmbed = new EmbedBuilder()
-                    .setTitle('Error!')
-                    .setDescription(`No achievements exist for this server.`)
-                    .setColor(randomColor);
+                    //.setTitle('Error!')
+                    .setDescription(Emojis.error + ` This guild has no achievements configured.`)
+                    .setColor(Colors.error);
                 return await interaction.reply({ embeds: [errorEmbed] });
             }
             let targetAchievement;
@@ -107,9 +107,9 @@ module.exports = {
             }
             if(!targetAchievement) {
                 const errorEmbed = new EmbedBuilder()
-                    .setTitle('Error!')
-                    .setDescription(`The achievement \`${achivmentName}\` does not exist.`)
-                    .setColor(randomColor);
+                    //.setTitle('Error!')
+                    .setDescription(Emojis.error + ` The achievement \`${achivmentName}\` does not exist.`)
+                    .setColor(Colors.error);
                 return await interaction.reply({ embeds: [errorEmbed] });
             }
 
@@ -125,13 +125,13 @@ module.exports = {
             })
 
             const successEmbed = new EmbedBuilder()
-                .setTitle('Success!')
-                .setDescription(`Deleted the achievement \`${achivmentName}\`.`)
-                .setColor(randomColor);
+                //.setTitle('Success!')
+                .setDescription(Emojis.success + ` The achievement \`${achivmentName}\` was deleted.`)
+                .setColor(Colors.sucecss);
             await interaction.reply({ embeds: [successEmbed] });
         } else if (subcommand === "link") {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+                return await interaction.reply({ content: 'You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
             }
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
             const linkName = interaction.options.getString('linkName');
@@ -140,9 +140,9 @@ module.exports = {
             const link = await linkSchema.findOne({ guildID: guild});
             if (!link) {
                 const errorEmbed = new EmbedBuilder()
-                    .setTitle('Error!')
-                    .setDescription(`You have no link dispenser in your server.`)
-                    .setColor(randomColor);
+                    //.setTitle('Error!')
+                    .setDescription(Emojis.error + ` This guild has no link dispensers configured.`)
+                    .setColor(Colors.error);
                 return await interaction.reply({ embeds: [errorEmbed] });
             }
             let targetLink;
@@ -154,9 +154,9 @@ module.exports = {
             }
             if(!targetLink) {
                 const errorEmbed = new EmbedBuilder()
-                    .setTitle('Error!')
-                    .setDescription(`The link dispenser \`${linkName}\` does not exist.`)
-                    .setColor(randomColor);
+                    //.setTitle('Error!')
+                    .setDescription(Emojis.error + ` The link dispenser \`${linkName}\` does not exist.`)
+                    .setColor(Colors.error);
                 return await interaction.reply({ embeds: [errorEmbed] });
             }
             await selfroles.updateOne({
@@ -170,9 +170,9 @@ module.exports = {
                 }
             })
             const successEmbed = new EmbedBuilder()
-                .setTitle('Success!')
-                .setDescription(`Deleted the link dispenser \`${linkName}\`.`)
-                .setColor(randomColor);
+                //.setTitle('Success!')
+                .setDescription(Emojis.success` Deleted the \`${linkName}\` link dispenser.`)
+                .setColor(Colors.success);
             await interaction.reply({ embeds: [successEmbed] });
         }
     }

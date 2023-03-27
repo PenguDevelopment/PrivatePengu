@@ -148,7 +148,9 @@ module.exports = {
                         //.setTitle('Cancelled')
                         .setDescription(Emojis.success + ' Command cancelled.')
                         .setColor(Colors.success);
-                    return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop() && voiceCollector.stop();
+                    await collector.stop();
+                    await voiceCollector.stop();
+                    return await interaction.followUp({ embeds: [cancelEmbed] });
                 }
                 if (isNaN(amount)) {
                     const notNumberEmbed = new EmbedBuilder()
@@ -212,7 +214,9 @@ module.exports = {
                         //.setTitle('Cancelled')
                         .setDescription(Emojis.success + ' Command cancelled.')
                         .setColor(Emojis.success);
-                    return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop() && reactionsCollector.stop();
+                    await collector.stop();
+                    await reactionsCollector.stop();
+                    return await interaction.followUp({ embeds: [cancelEmbed] });
                 }
                 if (isNaN(amount)) {
                     const notNumberEmbed = new EmbedBuilder()
@@ -277,7 +281,9 @@ module.exports = {
                         //.setTitle('Cancelled')
                         .setDescription(Emojis.success + ' Cancelled the command.')
                         .setColor(Colors.success);
-                    return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop() && roleNumberCollector.stop();
+                    await collector.stop();
+                    await roleNumberCollector.stop();
+                    return await interaction.followUp({ embeds: [cancelEmbed] });
                 }
                 if (isNaN(amount)) {
                     const notNumberEmbed = new EmbedBuilder()
@@ -342,7 +348,9 @@ module.exports = {
                         // .setTitle('Cancelled')
                         .setDescription(Emojis.success + ' Command cancelled.')
                         .setColor(Colors.success);
-                    return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop() && roleCollector.stop();
+                    await collector.stop();
+                    await roleCollector.stop();
+                    return await interaction.followUp({ embeds: [cancelEmbed] });
                 }
 
                 const requirements = {
@@ -400,7 +408,9 @@ module.exports = {
                         // .setTitle('Cancelled')
                         .setDescription(Emojis.success + ' Cancelled the command.')
                         .setColor(Colors.success);
-                    return await interaction.followUp({ embeds: [cancelEmbed] }) && await collector.stop() && await boostsCollector.stop();
+                    await collector.stop();
+                    await boostsCollector.stop();
+                    return await interaction.followUp({ embeds: [cancelEmbed] });
                 }
                 if (isNaN(amount)) {
                     const notNumberEmbed = new EmbedBuilder()
@@ -465,7 +475,9 @@ module.exports = {
                         // .setTitle('Cancelled')
                         .setDescription(Emojis.success + ' Cancelled the command.')
                         .setColor(Colors.success);
-                    return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop() && invitesCollector.stop();
+                    await collector.stop();
+                    await invitesCollector.stop();
+                    return await interaction.followUp({ embeds: [cancelEmbed] });
                 }
                 if (isNaN(amount)) {
                     const notNumberEmbed = new EmbedBuilder()
@@ -504,7 +516,8 @@ module.exports = {
                 // .setTitle('Cancelled')
                 .setDescription(Emojis.success + ' Cancelled the command.')
                 .setColor(Colors.success);
-            return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop();
+            await collector.stop();
+            return await interaction.followUp({ embeds: [cancelEmbed] });
         }
     });
  }
