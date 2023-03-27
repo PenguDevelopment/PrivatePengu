@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
 const selfroles = require( '../selfroles-schema.js');
-const { Emojis } = require('../statics.js');
+const { Emojis, Colors } = require('../statics.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +13,7 @@ module.exports = {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
                 return await interaction.reply({ content: Emojis.error + 'You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
             }
-            var randomColor = Math.floor(Math.random()*16777215).toString(16);
+            // var randomColor = Math.floor(Math.random()*16777215).toString(16);
             const panelName = interaction.options.getString('panel-name');
             const role = interaction.options.getRole('role');
             let emoji = interaction.options.getString('emoji');
@@ -69,7 +69,7 @@ module.exports = {
         const successEmbed = new EmbedBuilder()
             //.setTitle('Success!')
             .setDescription(Emojis.error + ` Added the \`${role.name}\` role to the \`${panelName}\` panel.`)
-            .setColor(Emojis.success);
+            .setColor(Colors.success);
         await interaction.reply({ embeds: [successEmbed] });
     }
 }

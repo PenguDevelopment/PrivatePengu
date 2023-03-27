@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('disc
 const selfroles = require( '../selfroles-schema.js');
 const achivment = require( '../achivment-schema.js');
 const linkSchema = require( '../links-schema.js');
+const { Emojis, Colors } = require('../statics.js');
 
 module.exports = {
     data: new SlashCommandBuilder()

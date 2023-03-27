@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
 const linksSchema = require('../links-schema.js');
-const { Emojis } = require('../statics.js');
+const { Emojis, Colors } = require("../statics.js")
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('create-link')

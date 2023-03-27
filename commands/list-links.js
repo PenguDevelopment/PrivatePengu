@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
 const linkSchema = require( '../links-schema.js');
+const { Emojis, Colors } = require('../statics.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -10,19 +11,20 @@ module.exports = {
         // check if have permission
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             const embed = new EmbedBuilder()
-                .setTitle('Error!')
-                .setDescription('You do not have permission to use this command.')
-                .setColor(randomColor);
+                // .setTitle('Error!')
+                .setDescription(Emojis.error + ' You do not have permission to use this command.')
+                .setColor(Colors.error);
             return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
         const guild = interaction.guild.id;
         // find all link dispensers, then add it to fields in a embed
         const links = linkSchema.findOne({ guildID: guild });
-        if (!links) {
+
+        if (!links.links) {
             const embed = new EmbedBuilder()
-                .setTitle('Error!')
-                .setDescription('You have no link dispensers in your server.')
-                .setColor(randomColor);
+                // .setTitle('Error!')
+                .setDescription(Emojis.error + ' You have no link dispensers in your server.')
+                .setColor(Colors.error);
             return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
@@ -30,6 +32,7 @@ module.exports = {
             .setTitle('Link Dispensers')
             .setDescription('Here are all the link dispensers in your server.')
             .setColor(randomColor);
+        
         for(let i = 0; i < links.links.length; i++) {
             embed.addField(links.links[i].linkName, links.links[i].linkDescription);
         }
