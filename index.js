@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 require('dotenv').config();
-const { Collection } = require('discord.js')
+const { Collection, ActivityType } = require('discord.js')
 const selfroles = require('./selfroles-schema.js');
 const chalk = require("chalk");
 const mongoose = require('mongoose');
@@ -24,6 +24,7 @@ client.on('ready', async () => {
 		keepAlive: true,
 	});
 	console.log(`${chalk.green("Success! ✔")} We are connected to the ${chalk.yellow("database")}!`);
+	client.user.setActivity('your commands', { type: ActivityType.Listening });
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
@@ -133,4 +134,4 @@ for (const file of eventFiles) {
 }
 
 // Log in to Discord with the client's token
-// client.login(token);
+client.login(token);

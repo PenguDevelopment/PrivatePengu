@@ -8,7 +8,8 @@ const guilds = require('../guild-schema.js');
 const verify = require('../verify-schema.js');
 const linkSchema = require('../links-schema.js');
 const personalLinkSchema = require('../personallink-schema.js');
-const { Emojis, Colors, EmojiIds } = require('../statics.js')
+const { Emojis, Colors, EmojiIds } = require('../statics.js');
+const { exists } = require('../personallink-schema.js');
 
 
 module.exports = {
@@ -36,8 +37,8 @@ module.exports = {
 		if (!suggestion) {
 			const embed = new EmbedBuilder()
 				//.setTitle('Error!')
-				.setDescription('That suggestion does not exist.')
-				.setColor(Colors.normal)
+				.setDescription(Emojis.error + ' That suggestion does not exist.')
+				.setColor(Colors.errpr)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		} else {
 			if (vote === 'yes') {
@@ -79,7 +80,7 @@ module.exports = {
 				if (!message) {
 					const embed = new EmbedBuilder()
 						//.setTitle('Error!')
-						.setDescription('That suggestion does not exist.')
+						.setDescription(Emojis.error + ' That suggestion does not exist.')
 						.setColor(Emojis.error)
 					return interaction.reply({ embeds: [embed], ephemeral: true });
 				}
@@ -121,9 +122,9 @@ module.exports = {
 				const message = await interaction.channel.messages.fetch(suggestion.messageId);
 				if (!message) {
 					const embed = new EmbedBuilder()
-						.setTitle('Error!')
-						.setDescription('That suggestion does not exist.')
-						.setColor(Colors.normal)
+						// .setTitle('Error!')
+						.setDescription(Emojis.error + ' That suggestion does not exist.')
+						.setColor(Colors.error)
 					return interaction.reply({ embeds: [embed], ephemeral: true });
 				}
 				await message.edit({ components: [row] });
@@ -141,9 +142,9 @@ module.exports = {
 					const reviewmessage = await interaction.channel.messages.fetch(suggestion.reviewMessageId);
 					if (!reviewmessage) {
 						const embed = new EmbedBuilder()
-							.setTitle('Error!')
-							.setDescription('That suggestion does not exist.')
-							.setColor(Colors.normal)
+							// .setTitle('Error!')
+							.setDescription(Emojis.error + ' That suggestion does not exist.') 
+							.setColor(Colors.error)
 						return interaction.reply({ embeds: [embed], ephemeral: true });
 					}
 					// get channel from guild
@@ -156,15 +157,14 @@ module.exports = {
 					const user = interaction.guild.members.cache.get(suggestion.author);
 
 					const embed = new EmbedBuilder()
-						.setTitle(`Suggestion From: ${user.user.tag}`)
+						//.setTitle(`Suggestion from ${user.user.tag}`)
 						.setDescription(suggestion.suggestion)// set avatar image as author
-						.setAuthor({ name: `New Suggestion!`, iconURL: user.user.displayAvatarURL({ dynamic: true }) })
+						.setAuthor({ name: `New suggestion from ${user.user.tag}`, iconURL: user.user.displayAvatarURL({ dynamic: true }) })
 						.setTimestamp()
 						.setColor(Colors.normal)
 					const embed2 = new EmbedBuilder()
-						.setTitle('Information')
-						.setAuthor({ name: "New Suggestion!", iconURL: user.user.avatarURL({ dynamic: true })})
-						.setDescription(`Suggestion By: <@${user.user.id}>`)
+						//.setTitle('Information')
+						.setAuthor({ name: `New suggestion from ${user.user.tag}`, iconURL: user.user.displayAvatarURL({ dynamic: true }) })
 						.addFields({ name: 'Suggestion:', value: `${suggestion.suggestion}` })
 						.setColor(Colors.normal)
 						.setTimestamp()
@@ -173,13 +173,13 @@ module.exports = {
 							new ButtonBuilder()
 								.setCustomId(`sug-${id}-approve`)
 								.setLabel('Approve')
-								.setEmoji('✅')
+								.setEmoji(EmojiIds.success)
 								.setStyle(3)
 								.setDisabled(true),
 							new ButtonBuilder()
 								.setCustomId(`sug-${id}-deny`)
 								.setLabel('Deny')
-								.setEmoji('⛔')
+								.setEmoji(EmojiIds.error)
 								.setStyle(4)
 								.setDisabled(true),
 						);
@@ -201,28 +201,28 @@ module.exports = {
 					const msg = await suggestionChannel.messages.fetch({ limit: 1 });
 					// add suggestion to database and also add the message id
 					await suggest.findOneAndUpdate({ id: id }, { $set: { messageId: msg.first().id } });
-					await interaction.reply({ content: 'You approved the suggestion!', ephemeral: true });
+					await interaction.reply({ content: Emojis.success + ' Successfully approved this suggestion!', ephemeral: true });
 				} else if (vote === 'deny') {
 					const id = interaction.customId.split('-')[1];
 					const suggestion = await suggest.findOne({ id: id });
 					if (!suggestion) {
 						const embed = new EmbedBuilder()
-							.setTitle('Error!')
-							.setDescription('That suggestion does not exist.')
-							.setColor(Colors.normal)
+							//.setTitle('Error!')
+							.setDescription(Emojis.error + ' This suggestion does not exist.')
+							.setColor(Colors.error)
 						return interaction.reply({ embeds: [embed], ephemeral: true });
 					}
 					const reviewmessage = await interaction.channel.messages.fetch(suggestion.reviewMessageId);
 					if (!reviewmessage) {
 						const embed = new EmbedBuilder()
-							.setTitle('Error!')
-							.setDescription('That suggestion does not exist.')
+							//.setTitle('Error!')
+							.setDescription(Emojis.error + ' This suggestion does not exist.')
 							.setColor(Colors.normal)
 						return interaction.reply({ embeds: [embed], ephemeral: true });
 					}
 					const user = interaction.guild.members.cache.get(suggestion.author);
 					const embed = new EmbedBuilder()
-						.setTitle('Suggestion Denied!')
+						.setTitle('Suggestion Denied')
 						.setDescription(`Suggestion: ${suggestion.suggestion}`)
 						.addFields(
 							{ name: 'Denied by:', value: `${interaction.user.tag}` },
@@ -235,18 +235,18 @@ module.exports = {
 							new ButtonBuilder()
 								.setCustomId(`sug-${id}-approve`)
 								.setLabel('Approve')
-								.setEmoji('✅')
+								.setEmoji(EmojiIds.success)
 								.setStyle(3)
 								.setDisabled(true),
 							new ButtonBuilder()
 								.setCustomId(`sug-${id}-deny`)
 								.setLabel('Deny')
-								.setEmoji('❌')
+								.setEmoji(EmojiIds.error)
 								.setStyle(4)
 								.setDisabled(true),
 						);
 					await reviewmessage.edit({ embeds: [embed], components: [row] });
-					await interaction.reply({ content: 'Suggestion Denied!', ephemeral: true });
+					await interaction.reply({ content: Emojis.error + ' Successfully denied this suggestion.', ephemeral: true });
 				}
 			}
 	} else if (interaction.isButton() && interaction.customId.startsWith('verify-')) {
@@ -254,33 +254,33 @@ module.exports = {
 		const verifySc = await verify.findOne({ specificId: id });
 		if (!verifySc) {
 			const embed = new EmbedBuilder()
-				.setTitle('Error!')
-				.setDescription('That verification does not exist.')
-				.setColor(Colors.normal)
+				//.setTitle('Error!')
+				.setDescription(Emojis.error + ' This verification panel doesn\'t exist.')
+				.setColor(Colors.error)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		const message = await interaction.channel.messages.fetch(verifySc.messageId);
 		if (!message) {
 			const embed = new EmbedBuilder()
-				.setTitle('Error!')
-				.setDescription('Somethign went wrong. Ask an admin to delete the verification and make a new one.')
-				.setColor(Colors.normal)
+				//.setTitle('Error!')
+				.setDescription(Emojis.buh + ' Uh oh! Something went wrong. Please have a server admin restart verification setup.')
+				.setColor(Colors.error)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		// add role to user
 		const role = interaction.guild.roles.cache.get(verifySc.roleId);
 		if (!role) {
 			const embed = new EmbedBuilder()
-				.setTitle('Error!')
-				.setDescription('Role does not exist. Ask an admin to reset the verification system.')
-				.setColor(Colors.normal)
+				// .setTitle('Error!')
+				.setDescription(Emojis.error + ' The verification role previously configured doesn\'t exist.  Please have a server admin restart verification setup.')
+				.setColor(Colors.error)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		await interaction.member.roles.add(role);
 		const embed = new EmbedBuilder()
-			.setTitle('Congrats!')
-			.setDescription('You have been verified! You can now access the server!')
-			.setColor(Colors.normal)
+			// .setTitle('Congrats!')
+			.setDescription(Emojis.success + ' You have been verified successfully.')
+			.setColor(Colors.success)
 		await interaction.reply({ embeds: [embed], ephemeral: true });
 	} else if (interaction.isButton() && interaction.customId.startsWith("get-link")) {
 		const guild = interaction.guild.id;
@@ -288,9 +288,9 @@ module.exports = {
 		const link = await linkSchema.findOne({ guildID: guild });
 		if (!link) {
 			const embed = new EmbedBuilder()
-				.setTitle('Error!')
-				.setDescription('There are no links set up for this server.')
-				.setColor(Colors.normal)
+				// .setTitle('Error!')
+				.setDescription(Emojis.error + ' There are no links set up for this server.')
+				.setColor(Colors.error)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		let personalLinkUser = await personalLinkSchema.findOne({ guildID: guild, userId: interaction.user.id });
@@ -307,9 +307,9 @@ module.exports = {
 		// check if they have reached the limit
 		if (personalLinkUser.linksThisMonth >= link.limit) {
 			const embed = new EmbedBuilder()
-				.setTitle('Error!')
-				.setDescription(`You have reached the limit of ${link.limit} links this month.`)
-				.setColor(Colors.normal)
+				//.setTitle('Error!')
+				.setDescription(Emojis.error + ` You have reached the limit of ${link.limit} links this month.`)
+				.setColor(Colors.error)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		} else {
 			// check what day it is and if it is the first of the month
@@ -333,9 +333,9 @@ module.exports = {
 
 		if (!targetLink) {
 			const embed = new EmbedBuilder()
-				.setTitle('Error!')
-				.setDescription('That link does not exist.')
-				.setColor(Colors.normal)
+				//.setTitle('Error!')
+				.setDescription(Emojis.error + ' That link does not exist.')
+				.setColor(Colors.error)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 		const links = targetLink.links;
