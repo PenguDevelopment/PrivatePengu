@@ -1,12 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
 const linksSchema = require('../links-schema.js');
+const { Emojis } = require('../statics.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('create-link')
         .setDescription('Create a link dispenser for your server.')
-        .addStringOption(option => option.setName('link-name').setDescription('The name of the link dispenser. (Remember this name! You\'ll need it to add links!)').setRequired(true))
-        .addStringOption(option => option.setName('link-description').setDescription('The description of the link dispenser.').setRequired(true))
-        .addStringOption(option => option.setName('link-color').setDescription('The color of the link dispenser.').setRequired(true).addChoices(
+        .addStringOption(option => option.setName('name').setDescription('The name of the link dispenser. (Remember this name! You\'ll need it to add links!)').setRequired(true))
+        .addStringOption(option => option.setName('description').setDescription('The description of the link dispenser.').setRequired(true))
+        .addStringOption(option => option.setName('color').setDescription('The color of the link dispenser.').setRequired(true).addChoices(
             { name: 'Random', value: 'random' },
             { name: 'Red', value: 'red' },
             { name: 'Green', value: 'green' },
@@ -29,15 +30,15 @@ module.exports = {
             { name: 'Olive', value: 'olive' },
             { name: 'Navy', value: 'navy' },
         ))
-        .addIntegerOption(option => option.setName('link-limit').setDescription('The number of links a person can get per month.').setRequired(false)),
+        .addIntegerOption(option => option.setName('limit').setDescription('The number of links a person can get per month.').setRequired(false)),
     async execute(interaction) {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
         }
-        const linkName = interaction.options.getString('link-name');
-        const linkDescription = interaction.options.getString('link-description');
-        const linkColor = interaction.options.getString('link-color');
-        const linkLimit = interaction.options.getInteger('link-limit') ? interaction.options.getInteger('link-limit') : "none";
+        const linkName = interaction.options.getString('name');
+        const linkDescription = interaction.options.getString('description');
+        const linkColor = interaction.options.getString('color');
+        const linkLimit = interaction.options.getInteger('limit') ? interaction.options.getInteger('limit') : "none";
         const guild = await interaction.guild.id;
         var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
         function colorSorter(color) {
@@ -100,17 +101,17 @@ module.exports = {
         if (alreadyExist) {
             var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
             const embed = new EmbedBuilder()
-                .setTitle('Link dispenser already exists!')
-                .setDescription('A link dispenser with that name already exists! Please choose a different name.')
-                .setColor(randomColor)
+                //.setTitle('Link dispenser already exists!')
+                .setDescription(Emojis.error + ' A link dispenser already exists with this name.')
+                .setColor(Colors.error)
                 .setTimestamp()
             return await interaction.reply({ embeds: [embed] });
         }
 
         const linkEmbed = new EmbedBuilder()
-            .setTitle('Successfully created link dispenser!')
-            .setDescription(`Remember that your link dispenser name is \`${linkName}\`! You\'ll need it to add roles to your link dispenser! Run the \`/add-links\` command to add links to your link dispenser!`)
-            .setColor(colorSorter(linkColor))
+            //.setTitle('Successfully created link dispenser!')
+            .setDescription(`Successfully created the \`${linkName}\` link dispenser.`)
+            .setColor(Emojis.success)
             .setTimestamp()
         await interaction.reply({ embeds: [linkEmbed] });
         await linksSchema.findOneAndUpdate(

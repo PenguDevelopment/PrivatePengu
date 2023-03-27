@@ -4,7 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('create-panel')
         .setDescription('Create a self-role panel for your server.')
-        .addStringOption(option => option.setName('panel-name').setDescription('The name of the panel. (Remember this name! You\'ll need it to add roles!)').setRequired(true))
+        .addStringOption(option => option.setName('panel-name').setDescription('The name of the panel.').setRequired(true))
         .addStringOption(option => option.setName('panel-description').setDescription('The description of the panel.').setRequired(true))
         .addStringOption(option => option.setName('panel-color').setDescription('The color of the panel.').setRequired(true).addChoices(
             { name: 'Random', value: 'random' },
@@ -31,7 +31,7 @@ module.exports = {
         )),
     async execute(interaction) {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+            return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
         }
         const panelName = interaction.options.getString('panel-name');
         const panelDescription = interaction.options.getString('panel-description');
@@ -98,17 +98,17 @@ module.exports = {
         if (alreadyExist) {
             var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
             const embed = new EmbedBuilder()
-                .setTitle('Panel already exists!')
-                .setDescription('A panel with that name already exists! Please choose a different name.')
-                .setColor(randomColor)
+                //.setTitle('Panel already exists!')
+                .setDescription(Emojis.error + ' A panel already exists with this name.')
+                .setColor(Colors.error)
                 .setTimestamp()
             return await interaction.reply({ embeds: [embed] });
         }
 
         const panelEmbed = new EmbedBuilder()
-            .setTitle('Successfully created panel!')
-            .setDescription(`Remember that your panel name is \`${panelName}\`! You\'ll need it to add roles to your panel! Run the \`/add-role\` command to add roles to your panel!`)
-            .setColor(colorSorter(panelColor))
+            //.setTitle('Successfully created panel!')
+            .setDescription(Emojis.success + ` Successfully created the \`${panelName}\` panel.`)
+            .setColor(Colors.success)
             .setTimestamp()
         await interaction.reply({ embeds: [panelEmbed] });
         await selfroles.findOneAndUpdate(

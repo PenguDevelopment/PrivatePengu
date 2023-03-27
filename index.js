@@ -42,7 +42,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
 	const guild = reaction.message.guild;
 	// find panel
 	let panelName = reaction.message.embeds[0].title || "";
-	const panel = await selfroles.findOne({ guild });
+	const panel = await selfroles.findOne({ guild }); 
+	
 	if (!panel) {
 		return;
 	}

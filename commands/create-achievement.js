@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
-const achivment = require( '../achivment-schema.js');
+const achivment = require( '../achivment-schema.js'); //ok ima go work
+const { Emojis, Colors } = require("../statics.js")
 module.exports = { 
     data: new SlashCommandBuilder()
     .setName('create-achievement')
@@ -11,7 +12,7 @@ module.exports = {
     var randomColor = Math.floor(Math.random()*16777215).toString(16);
     // check if have permission
     if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-        return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+        return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
     }
     const name = interaction.options.getString('name');
     const description = interaction.options.getString('description');
@@ -29,9 +30,9 @@ module.exports = {
     });
     if (achievement) {
         const alreadyExistsEmbed = new EmbedBuilder()
-            .setTitle('Error!')
-            .setDescription(`The achievement \`${name}\` already exists in the database.`)
-            .setColor(randomColor);
+            //.setTitle('Error!')
+            .setDescription(Emojis.error + ` The achievement \`${name}\` already exists in this guild.`)
+            .setColor(Colors.error);
         return await interaction.reply({ embeds: [alreadyExistsEmbed] });
     }
 
@@ -57,9 +58,9 @@ module.exports = {
       );
 
     const successEmbed = new EmbedBuilder()
-        .setTitle('Success!')
-        .setDescription(`Added the achievement \`${name}\` to the database. Make sure to add requirements to your achievement using \`/add-requirement\`.`)
-        .setColor(randomColor);
+        //.setTitle('Success!')
+        .setDescription(Emojis.success + ` Added the achievement \`${name}\` to the database. You can add requirements for this achievement using the \`/add-requirement\` command.`)
+        .setColor(Colors.success);
     await interaction.reply({ embeds: [successEmbed] });
 }
 }
