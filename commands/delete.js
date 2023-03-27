@@ -128,14 +128,14 @@ module.exports = {
             const successEmbed = new EmbedBuilder()
                 //.setTitle('Success!')
                 .setDescription(Emojis.success + ` The achievement \`${achivmentName}\` was deleted.`)
-                .setColor(Colors.sucecss);
+                .setColor(Colors.success);
             await interaction.reply({ embeds: [successEmbed] });
         } else if (subcommand === "link") {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
                 return await interaction.reply({ content: 'You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
             }
-            var randomColor = Math.floor(Math.random()*16777215).toString(16);
-            const linkName = interaction.options.getString('linkName');
+            // var randomColor = Math.floor(Math.random()*16777215).toString(16);
+            const linkName = interaction.options.getString('link');
             const guild = interaction.guild.id;
             // find panel and delete it
             const link = await linkSchema.findOne({ guildID: guild});
@@ -172,7 +172,7 @@ module.exports = {
             })
             const successEmbed = new EmbedBuilder()
                 //.setTitle('Success!')
-                .setDescription(Emojis.success` Deleted the \`${linkName}\` link dispenser.`)
+                .setDescription(Emojis.success + ` Deleted the \`${linkName}\` link dispenser.`)
                 .setColor(Colors.success);
             await interaction.reply({ embeds: [successEmbed] });
         }

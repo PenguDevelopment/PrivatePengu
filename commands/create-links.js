@@ -36,61 +36,13 @@ module.exports = {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
         }
+
         const linkName = interaction.options.getString('name');
         const linkDescription = interaction.options.getString('description');
         const linkColor = interaction.options.getString('color');
         const linkLimit = interaction.options.getInteger('limit') ? interaction.options.getInteger('limit') : "none";
         const guild = await interaction.guild.id;
-        var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
-        function colorSorter(color) {
-            // change color to hex
-            switch (color) {
-                case 'random':
-                    return randomColor;
-                case 'red':
-                    return '#ff0000';
-                case 'green':
-                    return '#00ff00';
-                case 'blue':
-                    return '#0000ff';
-                case 'yellow':
-                    return '#ffff00';
-                case 'purple':
-                    return '#800080';
-                case 'pink':
-                    return '#ffc0cb';
-                case 'orange':
-                    return '#ffa500';
-                case 'black':
-                    return '#000000';
-                case 'white':
-                    return '#ffffff';
-                case 'grey':
-                    return '#808080';
-                case 'cyan':
-                    return '#00ffff';
-                case 'lime':
-                    return '#00ff00';
-                case 'brown':
-                    return '#a52a2a';
-                case 'teal':
-                    return '#008080';
-                case 'silver':
-                    return '#c0c0c0';
-                case 'gold':
-                    return '#ffd700';
-                case 'magenta':
-                    return '#ff00ff';
-                case 'maroon':
-                    return '#800000';
-                case 'olive':
-                    return '#808000';
-                case 'navy':
-                    return '#000080';
-            }
-
-        }
-        // if already exist
+        
         const alreadyExist = await linksSchema.findOne({
             guildID: guild,
             links: {
@@ -99,8 +51,8 @@ module.exports = {
                 }
             }
         });
+
         if (alreadyExist) {
-            var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
             const embed = new EmbedBuilder()
                 //.setTitle('Link dispenser already exists!')
                 .setDescription(Emojis.error + ' A link dispenser already exists with this name.')
@@ -111,8 +63,8 @@ module.exports = {
 
         const linkEmbed = new EmbedBuilder()
             //.setTitle('Successfully created link dispenser!')
-            .setDescription(`Successfully created the \`${linkName}\` link dispenser.`)
-            .setColor(Emojis.success)
+            .setDescription(Emojis.success + ` Successfully created the \`${linkName}\` link dispenser.`)
+            .setColor(Colors.success)
             .setTimestamp()
         await interaction.reply({ embeds: [linkEmbed] });
         await linksSchema.findOneAndUpdate(

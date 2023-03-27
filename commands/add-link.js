@@ -12,7 +12,6 @@ module.exports = {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
                 return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command.', ephemeral: true });
             }
-            var randomColor = Math.floor(Math.random()*16777215).toString(16);
             const linkName = interaction.options.getString('link-name');
             const link = interaction.options.getString('link');
             const guild = interaction.guild.id;
@@ -53,7 +52,7 @@ module.exports = {
             // .setTitle('Success!')
             .setDescription(`\`${link}\` was added to the link \`${linkName}\` dispenser.`)
             .setColor(Colors.success);
-        await interaction.reply({ embeds: [successEmbed] });
+        await interaction.reply({ embeds: [successEmbed], ephemeral: true });
     }
 }
 

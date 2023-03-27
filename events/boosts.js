@@ -67,6 +67,9 @@ module.exports = {
                 }
     
             }
+            title = title.replace('{member}', member.user.tag);
+            description = description.replace('{member}', member.user.tag);
+            
             const embed = new EmbedBuilder()
                 .setTitle(title)
                 .setDescription(description)

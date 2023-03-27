@@ -18,7 +18,7 @@ module.exports = {
         }
         const guild = interaction.guild.id;
         // find all link dispensers, then add it to fields in a embed
-        const links = linkSchema.findOne({ guildID: guild });
+        let links = await linkSchema.findOne({ guildID: guild })
 
         if (!links.links) {
             const embed = new EmbedBuilder()
@@ -34,9 +34,9 @@ module.exports = {
             .setColor(randomColor);
         
         for(let i = 0; i < links.links.length; i++) {
-            embed.addField(links.links[i].linkName, links.links[i].linkDescription);
+            embed.addFields({ name: links.links[i].linkName, value: links.links[i].linkDescription });
         }
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed] });
     }
 }
 
