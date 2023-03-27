@@ -79,9 +79,9 @@ module.exports = {
                 amount = m.content.toLowerCase();
                 if (amount == 'cancel') {
                     const cancelEmbed = new EmbedBuilder()
-                        .setTitle('Cancelled')
-                        .setDescription('Cancelled the command.')
-                        .setColor(Colors.error);
+                        // .setTitle('Cancelled')
+                        .setDescription(Emojis.success + ' Cancelled the command.')
+                        .setColor(Colors.success);
                     collector.stop();
                     messagesCollector.stop();
                     return await interaction.followUp({ embeds: [cancelEmbed] });
@@ -275,8 +275,8 @@ module.exports = {
                 if (amount == 'cancel') {
                     const cancelEmbed = new EmbedBuilder()
                         //.setTitle('Cancelled')
-                        .setDescription(Emojis.error + ' Cancelled the command.')
-                        .setColor(Colors.error);
+                        .setDescription(Emojis.success + ' Cancelled the command.')
+                        .setColor(Colors.success);
                     return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop() && roleNumberCollector.stop();
                 }
                 if (isNaN(amount)) {
@@ -387,9 +387,9 @@ module.exports = {
 
             type = 'boosts';
             const boostsEmbed = new EmbedBuilder()
-                .setTitle('Add Requirement')
-                .setDescription('How many boosts does the user need?')
-                .setColor(randomColor);
+                // .setTitle('Add Requirement')
+                .setDescription('How many boosts does the user need?\n' + Emojis.message + " *Send a message containing your selection, or type `cancel`.*")
+                .setColor(Colors.awaiting);
             await interaction.followUp({ embeds: [boostsEmbed] });
             const boostsCollector = interaction.channel.createMessageCollector({ filter, time: 60000 });
             boostsCollector.on('collect', async (m) => {
@@ -397,16 +397,16 @@ module.exports = {
                 amount = m.content.toLowerCase();
                 if (amount == 'cancel') {
                     const cancelEmbed = new EmbedBuilder()
-                        .setTitle('Cancelled')
-                        .setDescription('Cancelled the command.')
-                        .setColor(randomColor);
-                    return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop() && boostsCollector.stop();
+                        // .setTitle('Cancelled')
+                        .setDescription(Emojis.success + ' Cancelled the command.')
+                        .setColor(Colors.success);
+                    return await interaction.followUp({ embeds: [cancelEmbed] }) && await collector.stop() && await boostsCollector.stop();
                 }
                 if (isNaN(amount)) {
                     const notNumberEmbed = new EmbedBuilder()
-                        .setTitle('Error!')
-                        .setDescription('The amount must be a number.')
-                        .setColor(randomColor);
+                        // .setTitle('Error!')  buh moment
+                        .setDescription(Emojis.error + ' The amount must be a number.')
+                        .setColor(Colors.error);
                     return await interaction.followUp({ embeds: [notNumberEmbed] });
                 }
 
@@ -427,9 +427,9 @@ module.exports = {
                     }
                 );
                 const successEmbed = new EmbedBuilder()
-                    .setTitle('Success!')
-                    .setDescription(`Added the requirement \`${type}\` with an amount of \`${amount}\` to the achievement \`${name}\`.`)
-                    .setColor(randomColor);
+                    // .setTitle('Success!')
+                    .setDescription(Emojis.success + ` Added the requirement \`${type}\` with an amount of \`${amount}\` to the achievement \`${name}\`.`)
+                    .setColor(Colors.success);
                 await interaction.followUp({ embeds: [successEmbed] });
                 collector.stop();
                 boostsCollector.stop();
@@ -444,16 +444,16 @@ module.exports = {
             });
             if (invitesRequirement) {
                 const alreadyExistsEmbed = new EmbedBuilder()
-                    .setTitle('Error!')
-                    .setDescription('The invites requirement already exists for this achievement.')
-                    .setColor(randomColor);
+                    // .setTitle('Error!')
+                    .setDescription(Emojis.error + ' The invites requirement already exists for this achievement.')
+                    .setColor(Colors.error);
                 return await interaction.followUp({ embeds: [alreadyExistsEmbed] });
             }
 
             type = 'invites';
             const invitesEmbed = new EmbedBuilder()
-                .setTitle('Add Requirement')
-                .setDescription('How many invites does the user need?')
+                // .setTitle('Add Requirement')
+                .setDescription('How many invites does the user need?\n' + Emojis.message + " *Send a message containing your selection, or type `cancel`.*")
                 .setColor(randomColor);
             await interaction.followUp({ embeds: [invitesEmbed] });
             const invitesCollector = interaction.channel.createMessageCollector({ filter, time: 60000 });
@@ -462,16 +462,16 @@ module.exports = {
                 amount = m.content.toLowerCase();
                 if (amount == 'cancel') {
                     const cancelEmbed = new EmbedBuilder()
-                        .setTitle('Cancelled')
-                        .setDescription('Cancelled the command.')
-                        .setColor(randomColor);
+                        // .setTitle('Cancelled')
+                        .setDescription(Emojis.success + ' Cancelled the command.')
+                        .setColor(Colors.success);
                     return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop() && invitesCollector.stop();
                 }
                 if (isNaN(amount)) {
                     const notNumberEmbed = new EmbedBuilder()
-                        .setTitle('Error!')
-                        .setDescription('The amount must be a number.')
-                        .setColor(randomColor);
+                        // .setTitle('Error!')
+                        .setDescription(Emojis.error + ' The amount must be a number.')
+                        .setColor(Colors.error);
                     return await interaction.followUp({ embeds: [notNumberEmbed] });
                 }
 
@@ -492,18 +492,18 @@ module.exports = {
                     }
                 );
                 const successEmbed = new EmbedBuilder()
-                    .setTitle('Success!')
-                    .setDescription(`Added the requirement \`${type}\` with an amount of \`${amount}\` to the achievement \`${name}\`.`)
-                    .setColor(randomColor);
+                    // .setTitle('Success!')
+                    .setDescription(Emojis.success + ` Added the requirement \`${type}\` with an amount of \`${amount}\` to the achievement \`${name}\`.`)
+                    .setColor(Colors.success);
                 await interaction.followUp({ embeds: [successEmbed] });
                 collector.stop();
                 invitesCollector.stop();
             });
         } else if (c === 'cancel') {
             const cancelEmbed = new EmbedBuilder()
-                .setTitle('Cancelled')
-                .setDescription('Cancelled the command.')
-                .setColor(randomColor);
+                // .setTitle('Cancelled')
+                .setDescription(Emojis.success + ' Cancelled the command.')
+                .setColor(Colors.success);
             return await interaction.followUp({ embeds: [cancelEmbed] }) && collector.stop();
         }
     });
