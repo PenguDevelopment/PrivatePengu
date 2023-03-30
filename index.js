@@ -24,6 +24,10 @@ client.on('ready', async () => {
 		keepAlive: true,
 	});
 	console.log(`${chalk.green("Success! ✔")} We are connected to the ${chalk.yellow("database")}!`);
+	const guilds = client.guilds.cache;
+	for (const guild of guilds.values()) {
+		await guild.members.fetch();
+	}
 	client.user.setActivity('your commands', { type: ActivityType.Listening });
 });
 
@@ -103,9 +107,6 @@ client.on('messageReactionRemove', async (reaction, user) => {
 		}
 	}
 })
-
-const Leave = require('./events/leave.js');
-Leave.init(client);
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));

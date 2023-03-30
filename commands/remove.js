@@ -3,10 +3,14 @@ const linkSchema = require( '../links-schema.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('remove-links')
-        .setDescription('Remove a link dispenser from your server.')
-        .addStringOption(option => option.setName('dispensername').setDescription('The name of the link dispenser.').setRequired(true))
-        .addStringOption(option => option.setName('link-name').setDescription('The name of the link you want to remove.').setRequired(true)),
+        .setName('remove')
+        .setDescription('Remove something.')
+        .addSubcommand(subcommand => subcommand
+            .setName('links')
+            .setDescription('Remove a link dispenser from your server.')
+            .addStringOption(option => option.setName('dispensername').setDescription('The name of the link dispenser.').setRequired(true))
+            .addStringOption(option => option.setName('link-name').setDescription('The name of the link you want to remove.').setRequired(true))
+        ),
     async execute(interaction) {
         var randomColor = Math.floor(Math.random()*16777215).toString(16);
         // check if have permission

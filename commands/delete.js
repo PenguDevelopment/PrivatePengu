@@ -82,19 +82,17 @@ module.exports = {
                 }
             })
             const successEmbed = new EmbedBuilder()
-                //.setTitle('Success!')
                 .setDescription(Emojis.success + ` Deleted the panel \`${panelName}\`.`)
                 .setColor(Colors.success);
             await interaction.reply({ embeds: [successEmbed] });
         } else if (subcommand === 'achievement') {
             const achivmentName = interaction.options.getString('achievement');
             const guild = interaction.guild.id;
-            // find achivment and delete it
-            var randomColor = Math.floor(Math.random()*16777215).toString(16);
-            const achievement = await achivment.findOne({ guild });
-            if (!achievement) {
+
+            const achievement = await achivment.findOne({ guildID: guild });
+
+            if (!achievement || !achievement.achievements.length > 0) {
                 const errorEmbed = new EmbedBuilder()
-                    //.setTitle('Error!')
                     .setDescription(Emojis.error + ` This guild has no achievements configured.`)
                     .setColor(Colors.error);
                 return await interaction.reply({ embeds: [errorEmbed] });
@@ -108,7 +106,6 @@ module.exports = {
             }
             if(!targetAchievement) {
                 const errorEmbed = new EmbedBuilder()
-                    //.setTitle('Error!')
                     .setDescription(Emojis.error + ` The achievement \`${achivmentName}\` does not exist.`)
                     .setColor(Colors.error);
                 return await interaction.reply({ embeds: [errorEmbed] });

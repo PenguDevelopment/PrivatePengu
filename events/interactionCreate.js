@@ -3,13 +3,11 @@ const suggest = require('../suggestions-schema.js');
 const { EmbedBuilder } = require('discord.js');
 const { ButtonBuilder } = require('discord.js');
 const { ActionRowBuilder } = require('discord.js');
-var randomColor = Math.floor(Math.random()*16777215).toString(16);
 const guilds = require('../guild-schema.js');
 const verify = require('../verify-schema.js');
 const linkSchema = require('../links-schema.js');
 const personalLinkSchema = require('../personallink-schema.js');
 const { Emojis, Colors, EmojiIds } = require('../statics.js');
-const { exists } = require('../personallink-schema.js');
 
 
 module.exports = {
@@ -66,15 +64,12 @@ module.exports = {
 							.setCustomId(`sug-${id}-yes`)
 							.setLabel(`${newVotes.yes}`)
 							.setEmoji(EmojiIds.success)
-							.setStyle(3),
+							.setStyle(2),
 						new ButtonBuilder()
 							.setCustomId(`sug-${id}-no`)
-
-
-
 							.setLabel(`${newVotes.no}`)
 							.setEmoji(EmojiIds.error)
-							.setStyle(4),
+							.setStyle(2),
 					);
 				const message = await interaction.channel.messages.fetch(suggestion.messageId);
 				if (!message) {
@@ -112,12 +107,12 @@ module.exports = {
 							.setCustomId(`sug-${id}-yes`)
 							.setLabel(`${newVotes.yes}`)
 							.setEmoji(EmojiIds.success)
-							.setStyle(3),
+							.setStyle(2),
 						new ButtonBuilder()
 							.setCustomId(`sug-${id}-no`)
 							.setLabel(`${newVotes.no}`)
 							.setEmoji(EmojiIds.error)
-							.setStyle(4),
+							.setStyle(2),
 					);
 				const message = await interaction.channel.messages.fetch(suggestion.messageId);
 				if (!message) {
@@ -283,69 +278,79 @@ module.exports = {
 			.setColor(Colors.success)
 		await interaction.reply({ embeds: [embed], ephemeral: true });
 	} else if (interaction.isButton() && interaction.customId.startsWith("get-link")) {
-		const guild = interaction.guild.id;
 		const linkName = interaction.customId.split('-')[2];
-		const link = await linkSchema.findOne({ guildID: guild });
+		const links = await linkSchema.findOne({ guildID: interaction.guild.id });
+
+		if (!links || !links.links.length > 0) {
+			const embed = new EmbedBuilder()
+				.setDescription(Emojis.error + ' This server has no links configured.')
+				.setColor(Colors.error)
+			return interaction.reply({ embeds: [embed], ephemeral: true });
+		}
+
+		const link = await links.links.find((l) => l.linkName === linkName);
+
 		if (!link) {
 			const embed = new EmbedBuilder()
-				// .setTitle('Error!')
-				.setDescription(Emojis.error + ' There are no links set up for this server.')
+				.setDescription(Emojis.error + ' This Link Dispencer does not exist.')
 				.setColor(Colors.error)
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
-		let personalLinkUser = await personalLinkSchema.findOne({ guildID: guild, userId: interaction.user.id });
-		if (!personalLinkUser) {
-			// create a new user
-			const newLinkUser = new personalLinkSchema({
-				guildID: guild,
+
+		let personalLink = await personalLinkSchema.findOne({ userId: interaction.user.id, guildID: interaction.guild.id });
+
+		if (!personalLink) {
+			personalLink = await new personalLinkSchema({
 				userId: interaction.user.id,
+				guildID: interaction.guild.id,
 				linksThisMonth: 0,
-			});
-			await newLinkUser.save();
-			personalLinkUser = newLinkUser;
+			}).save();
 		}
-		// check if they have reached the limit
-		if (personalLinkUser.linksThisMonth >= link.limit) {
-			const embed = new EmbedBuilder()
-				//.setTitle('Error!')
-				.setDescription(Emojis.error + ` You have reached the limit of ${link.limit} links this month.`)
-				.setColor(Colors.error)
-			return interaction.reply({ embeds: [embed], ephemeral: true });
-		} else {
-			// check what day it is and if it is the first of the month
-			const today = new Date();
-			if (today.getDate() === 1) {
-				// reset the links
-				personalLinkUser.linksThisMonth = 0;
-				await personalLinkUser.save();
-			}
-			// add 1 to the links
-			personalLinkUser.linksThisMonth += 1;
-			await personalLinkUser.save();
-		}
-		// get the links from link panel
-		var targetLink;
-		for (let i = 0; i < link.links.length; i++) {
-			if (link.links[i].linkName === linkName) {
-				targetLink = link.links[i];
+
+		if (personalLink.linksThisMonth >= link.linkLimit) {
+			let date = Date.now();
+			date = new Date(date);
+
+			const day = date.getDate();
+			if (day === 1) {
+				personalLink.linksThisMonth = 0;
+				await personalLink.save();
+			} else {
+				const embed = new EmbedBuilder()
+					.setDescription(Emojis.error + ' You have reached your link limit for this month.')
+					.setColor(Colors.error)
+				return interaction.reply({ embeds: [embed], ephemeral: true });
 			}
 		}
 
-		if (!targetLink) {
-			const embed = new EmbedBuilder()
-				//.setTitle('Error!')
-				.setDescription(Emojis.error + ' That link does not exist.')
-				.setColor(Colors.error)
-			return interaction.reply({ embeds: [embed], ephemeral: true });
-		}
-		const links = targetLink.links;
-		const randomLink = links[Math.floor(Math.random() * links.length)].link;
+		const randomLink = link.links[Math.floor(Math.random() * link.links.length)];
+		let remaining = link.linkLimit - (personalLink.linksThisMonth + 1);
+		let message = remaining === 1 ? 'link' : 'links';
 		
 		const embed = new EmbedBuilder()
-			.setTitle('Here is your link!')
-			.setDescription(`${randomLink}`)
+			.setTitle('Your link is here!')
+			.addFields(
+				{ name: `${Emojis.link} Link`, value: `${Emojis.reply} ${randomLink.link}` },
+			)
+			.setFooter({ text: `You have ${remaining} ${message} remaining!`, iconURL: 'https://cdn.discordapp.com/emojis/1091035673882009651.png?v=1'})
 			.setColor(Colors.normal)
-		await interaction.reply({ embeds: [embed], ephemeral: true });
+
+		try {
+			const onItsway = new EmbedBuilder()
+				.setDescription(Emojis.loading + ' Your link is on its way! (Check your DMs)')
+				.setColor(Colors.normal)
+			await interaction.reply({ embeds: [onItsway], ephemeral: true });
+			await interaction.user.send({ embeds: [embed] });
+			personalLink.linksThisMonth++;
+			await personalLink.save();
+		} catch {
+			const embed = new EmbedBuilder()
+				.setDescription(Emojis.error + ' I was unable to send you a DM. Please enable DMs from server members.')
+				.setColor(Colors.error)
+			personalLink.linksThisMonth--;
+			await personalLink.save();
+			return interaction.reply({ embeds: [embed], ephemeral: true });
+		}
 	}
 	},
 };
