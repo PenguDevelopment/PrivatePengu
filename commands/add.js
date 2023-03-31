@@ -3,6 +3,46 @@ const selfroles = require( '../selfroles-schema.js');
 const { Emojis, Colors } = require('../statics.js');
 const linksSchema = require('../links-schema.js');
 const achivment = require('../achivment-schema.js');
+const rainbowSchema = require('../rainbow-schema.js');
+
+async function rainbowRole(role, delay) {
+    const rainbow = new Array(12);
+
+    for (var i = 0; i < 12; i++) {
+        var red = sin_to_hex(i, 0 * Math.PI * 2 / 3); // 0   deg
+        var blue = sin_to_hex(i, 1 * Math.PI * 2 / 3); // 120 deg
+        var green = sin_to_hex(i, 2 * Math.PI * 2 / 3); // 240 deg
+
+        rainbow[i] = '#' + red + green + blue;
+    }
+
+    function sin_to_hex(i, phase) {
+        var sin = Math.sin(Math.PI / 12 * 2 * i + phase);
+        var int = Math.floor(sin * 127) + 128;
+        var hex = int.toString(16);
+
+        return hex.length === 1 ? '0' + hex : hex;
+    }
+
+    const duration = delay * 1000;
+
+    let currentColor = role.color;
+    currentColor = "#" + currentColor.toString(16);
+
+    const currentIndex = rainbow.indexOf(currentColor);
+
+    if (currentIndex === -1) {
+        await role.setColor(rainbow[0]);
+    }
+    else {
+        await role.setColor(rainbow[currentIndex + 1]);
+    }
+
+    setTimeout(() => {
+        rainbowRole(role, delay);
+    }
+    , duration);
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -34,6 +74,15 @@ module.exports = {
                 .addStringOption(option => option.setName('field-name').setDescription('The name of the field.').setRequired(true))
                 .addStringOption(option => option.setName('field-value').setDescription('The value of the field.').setRequired(true))
                 .addBooleanOption(option => option.setName('inline').setDescription('Whether the field is inline or not.').setRequired(true))
+        ).addSubcommand(subcommand =>
+            subcommand
+                .setName('rainbow-role')
+                .setDescription('Add a role to the rainbow roles.')
+                .addRoleOption(option => option.setName('role').setDescription('The role to add to the rainbow roles.').setRequired(true))
+                .addIntegerOption(option => option.setName('delay').setDescription('The delay between each color change.').setRequired(true).addChoices(
+                    { name: '12 hours', value: 43200 },
+                    { name: '1 day', value: 86400 },
+                ))
         ),
         async execute(interaction) {
             const subcommand = interaction.options.getSubcommand();
@@ -41,7 +90,6 @@ module.exports = {
                 if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
                     return await interaction.reply({ content: Emojis.error + 'You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
                 }
-                // var randomColor = Math.floor(Math.random()*16777215).toString(16);
                 const panelName = interaction.options.getString('panel-name');
                 const role = interaction.options.getRole('role');
                 let emoji = interaction.options.getString('emoji');
@@ -140,7 +188,6 @@ module.exports = {
                 }
             })
             const successEmbed = new EmbedBuilder()
-                // .setTitle('Success!')
                 .setDescription(`\`${link}\` was added to the link \`${linkName}\` dispenser.`)
                 .setColor(Colors.success);
             await interaction.reply({ embeds: [successEmbed], ephemeral: true });
@@ -698,10 +745,59 @@ module.exports = {
             });
             
             const embed = new EmbedBuilder()
-                // .setTitle('Success!')
                 .setDescription(Emojis.success + ` Added the field \`${fieldName}\` to the panel \`${panelName}\`.`)
                 .setColor(Colors.success);
             await interaction.reply({ embeds: [embed], ephemeral: true });
+        } else if (subcommand === 'rainbow-role') {
+            let guild = interaction.guild.id;
+            let role = interaction.options.getRole('role');
+            let delay = interaction.options.getInteger('delay');
+
+            if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+                const noPermsEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' You do not have permission to use this command.')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [noPermsEmbed], ephemeral: true });
+            }
+
+            let rainbowRoles = await rainbowSchema.findOne({ guildID: guild });
+
+            if (!rainbowRoles) {
+                rainbowRoles = new rainbowSchema({
+                    guildID: guild,
+                    rainbowRoles: []
+                });
+                await rainbowRoles.save();
+            }
+
+            for (let i = 0; i < rainbowRoles.rainbowRoles.length; i++) {
+                if (rainbowRoles.rainbowRoles[i] === role.id) {
+                    const alreadyExistsEmbed = new EmbedBuilder()
+                        .setDescription(Emojis.error + ' This role is already a rainbow role.')
+                        .setColor(Colors.error);
+                    return await interaction.reply({ embeds: [alreadyExistsEmbed], ephemeral: true });
+                }
+            }
+
+            await rainbowSchema.findOneAndUpdate(
+                {
+                    guildID: guild
+                },
+                {
+                    $push: {
+                        'rainbowRoles': {
+                            roleID: role.id,
+                            delay: delay
+                        },
+                    }
+                }
+            );
+
+            const successEmbed = new EmbedBuilder()
+                .setDescription(Emojis.success + ` Added the role \`${role.name}\` to the rainbow roles.`)
+                .setColor(Colors.success);
+            await interaction.reply({ embeds: [successEmbed], ephemeral: true });
+            rainbowRole(role, delay);
         }
     }
 }

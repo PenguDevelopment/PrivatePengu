@@ -20,14 +20,10 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds,
 client.commands = new Collection();
 
 client.on('ready', async () => {
-	await mongoose.connect(process.env.MONGO_URI, {
+	mongoose.connect(process.env.MONGO_URI, {
 		keepAlive: true,
 	});
 	console.log(`${chalk.green("Success! ✔")} We are connected to the ${chalk.yellow("database")}!`);
-	const guilds = client.guilds.cache;
-	for (const guild of guilds.values()) {
-		await guild.members.fetch();
-	}
 	client.user.setActivity('your commands', { type: ActivityType.Listening });
 });
 

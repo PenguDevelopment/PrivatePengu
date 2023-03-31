@@ -3,6 +3,7 @@ const selfroles = require( '../selfroles-schema.js');
 const achivment = require( '../achivment-schema.js');
 const linkSchema = require( '../links-schema.js');
 const { Emojis, Colors } = require('../statics.js');
+const rainbowSchema = require('../rainbow-schema.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -37,6 +38,12 @@ module.exports = {
                         .setDescription('The link dispenser you want to delete')
                         .setRequired(true)
                 )
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('rainbow-role')
+                .setDescription('Delete a rainbow role.')
+                .addRoleOption(option => option.setName('role').setDescription('The role to delete from the rainbow roles.').setRequired(true))
         ),
 
     async execute(interaction) {
@@ -129,7 +136,10 @@ module.exports = {
             await interaction.reply({ embeds: [successEmbed] });
         } else if (subcommand === "link") {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                return await interaction.reply({ content: 'You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
+                const errorEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` You do not have permission to use this command. (Requires \`ADMINISTRATOR\`)`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [errorEmbed] });
             }
             // var randomColor = Math.floor(Math.random()*16777215).toString(16);
             const linkName = interaction.options.getString('link');
@@ -168,8 +178,56 @@ module.exports = {
                 }
             })
             const successEmbed = new EmbedBuilder()
-                //.setTitle('Success!')
                 .setDescription(Emojis.success + ` Deleted the \`${linkName}\` link dispenser.`)
+                .setColor(Colors.success);
+            await interaction.reply({ embeds: [successEmbed] });
+        } else if (subcommand === 'rainbow-role') {
+            if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+                const errorEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` You do not have permission to use this command. (Requires \`ADMINISTRATOR\`)`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [errorEmbed] });
+            }
+
+            const role = interaction.options.getRole('role');
+            const rainbowRoles = await rainbowSchema.findOne({ guildID: interaction.guild.id });
+
+            if (!rainbowRoles || !rainbowRoles.rainbowRoles.length > 0) {
+                const errorEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` This guild has no rainbow roles configured.`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [errorEmbed] });
+            }
+            
+            let targetRole;
+
+            for(let i = 0; i < rainbowRoles.rainbowRoles.length; i++) {
+                if(rainbowRoles.rainbowRoles[i].roleID == role.id) {
+                    targetRole = await rainbowRoles.rainbowRoles[i].roleID;
+                    break;
+                }
+            }
+
+            if(!targetRole) {
+                const errorEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` The role \`${role.name}\` is not a rainbow role.`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [errorEmbed] });
+            }
+
+            await rainbowSchema.updateOne({
+                guildID: interaction.guild.id,
+                'rainbowRoles.roleID': role.id
+            }, {
+                $pull: {
+                    'rainbowRoles': {
+                        roleID: role.id
+                    }
+                }
+            })
+
+            const successEmbed = new EmbedBuilder()
+                .setDescription(Emojis.success + ` Deleted the \`${role.name}\` rainbow role.`)
                 .setColor(Colors.success);
             await interaction.reply({ embeds: [successEmbed] });
         }
