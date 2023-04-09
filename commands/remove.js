@@ -12,6 +12,12 @@ module.exports = {
             .addStringOption(option => option.setName('link-name').setDescription('The name of the link you want to remove.').setRequired(true))
         ),
     async execute(interaction) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         var randomColor = Math.floor(Math.random()*16777215).toString(16);
         // check if have permission
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {

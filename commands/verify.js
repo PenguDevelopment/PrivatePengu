@@ -12,6 +12,12 @@ module.exports = {
         .addChannelOption(option => option.setName('channel').setDescription('The channel to send the button menu in.').setRequired(true))
         .addRoleOption(option => option.setName('role').setDescription('The role to give to people who click the button.').setRequired(true)),
     async execute(interaction) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
         }

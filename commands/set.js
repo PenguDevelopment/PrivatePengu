@@ -142,6 +142,12 @@ module.exports = {
             .addBooleanOption(option => option.setName('mention').setDescription('Do you want a mention on the outside of the embed?').setRequired(true))
         ),
     async execute(interaction) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         const subcommand = interaction.options.getSubcommand();
         if (subcommand === 'role') {
             const guild = interaction.guild.id;

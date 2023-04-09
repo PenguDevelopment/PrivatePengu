@@ -5,6 +5,12 @@ module.exports = {
         .setName('help')
         .setDescription('Get help with the bot.'),
     async execute(interaction) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         var randomColor = Math.floor(Math.random()*16777215).toString(16);
         const helpEmbed = new EmbedBuilder()
             .setTitle('Help')

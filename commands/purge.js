@@ -9,6 +9,12 @@ module.exports = {
         .setDescription('Purges a specified amount of messages. (Old messages are fine.)')
         .addIntegerOption(option => option.setName('amount').setDescription('The amount of messages to purge.').setRequired(true)),
     async execute(interaction) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         const amount = interaction.options.getInteger('amount');
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {

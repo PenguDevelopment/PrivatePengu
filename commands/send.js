@@ -17,6 +17,12 @@ module.exports = {
             .addChannelOption(option => option.setName('channel').setDescription('The channel to send the panel to.').setRequired(true))
         ),
     async execute(interaction) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         let subcommand = interaction.options.getSubcommand();
 
         if (subcommand === 'link') {

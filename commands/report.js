@@ -10,6 +10,12 @@ module.exports = {
         .addUserOption(option => option.setName('user').setDescription('The user to report.').setRequired(true))
         .addStringOption(option => option.setName('reason').setDescription('The reason for the report.').setRequired(true)),
     async execute(interaction) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         // check if report channel exists
         const guild = await guilds.findOne({
             guildID: interaction.guild.id

@@ -85,6 +85,13 @@ module.exports = {
                 ))
         ),
         async execute(interaction) {
+            if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
+            }
+
             const subcommand = interaction.options.getSubcommand();
             if (subcommand === 'role') {
                 if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {

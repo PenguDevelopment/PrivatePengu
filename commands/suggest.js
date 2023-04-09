@@ -12,6 +12,12 @@ module.exports = {
         .setDescription('Suggest something!')
         .addStringOption(option => option.setName('suggestion').setDescription('The suggestion to send.').setRequired(true)),
     async execute(interaction) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         const suggestion = interaction.options.getString('suggestion');
         const guilds = await guild.findOne({ guildID: interaction.guild.id });
         function genId(length) {
