@@ -76,23 +76,26 @@ module.exports = {
         .addIntegerOption(option => option.setName('limit').setDescription('The number of links a person can get per month.').setRequired(false))
     ),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-                .setColor(Colors.error);
-            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.flags.SendMessages)) {
+            return;
         }
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        
       const subcommand = interaction.options.getSubcommand();
       if (subcommand === 'achievement') {
           if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
+            const noPermissionEmbed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
         }
+
         const name = interaction.options.getString('name');
         const description = interaction.options.getString('description');
         const reward = interaction.options.getRole('reward');
     
         const guild = interaction.guild;
-        // first find out if the achievement already exists
+
         const achievement = await achivment.findOne({
             guildID: guild.id,
             achievements: {
@@ -104,13 +107,11 @@ module.exports = {
 
         if (achievement) {
             const alreadyExistsEmbed = new EmbedBuilder()
-                //.setTitle('Error!')
                 .setDescription(Emojis.error + ` The achievement \`${name}\` already exists in this guild.`)
                 .setColor(Colors.error);
-            return await interaction.reply({ embeds: [alreadyExistsEmbed] });
+            return await interaction.reply({ embeds: [alreadyExistsEmbed], ephemeral: true });
         }
     
-        // add this to database (this data may or may not already exist)
         await achivment.findOneAndUpdate(
             {
               guildID: guild.id
@@ -132,13 +133,15 @@ module.exports = {
           );
     
         const successEmbed = new EmbedBuilder()
-            //.setTitle('Success!')
             .setDescription(Emojis.success + ` Successfully created the achievement \`${name}\` You can add requirements for this achievement using the \`/add requirement\` command.`)
             .setColor(Colors.success);
         await interaction.reply({ embeds: [successEmbed] });
       } else if (subcommand === 'panel') {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
+            const noPermissionEmbed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
         }
         const panelName = interaction.options.getString('panel-name');
         const panelDescription = interaction.options.getString('panel-description');
@@ -157,15 +160,13 @@ module.exports = {
 
         if (alreadyExist) {
             const embed = new EmbedBuilder()
-                //.setTitle('Panel already exists!')
                 .setDescription(Emojis.error + ' A panel already exists with this name.')
                 .setColor(Colors.error)
                 .setTimestamp()
-            return await interaction.reply({ embeds: [embed] });
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
         const panelEmbed = new EmbedBuilder()
-            //.setTitle('Successfully created panel!')
             .setDescription(Emojis.success + ` Successfully created the \`${panelName}\` panel.`)
             .setColor(Colors.success)
             .setTimestamp()
@@ -194,7 +195,10 @@ module.exports = {
         );
       } else if (subcommand === 'link') {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
+            const noPermissionEmbed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
         }
 
         const linkName = interaction.options.getString('name');
@@ -214,15 +218,13 @@ module.exports = {
 
         if (alreadyExist) {
             const embed = new EmbedBuilder()
-                //.setTitle('Link dispenser already exists!')
                 .setDescription(Emojis.error + ' A link dispenser already exists with this name.')
                 .setColor(Colors.error)
                 .setTimestamp()
-            return await interaction.reply({ embeds: [embed] });
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
         const linkEmbed = new EmbedBuilder()
-            //.setTitle('Successfully created link dispenser!')
             .setDescription(Emojis.success + ` Successfully created the \`${linkName}\` link dispenser.`)
             .setColor(Colors.success)
             .setTimestamp()

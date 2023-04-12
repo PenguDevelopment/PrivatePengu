@@ -6,12 +6,9 @@ module.exports = {
 		.setName('ping')
 		.setDescription('Replies with Pong!'),
 	async execute(interaction) {
-		if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
-			const embed = new EmbedBuilder()
-				.setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-				.setColor(Colors.error);
-			return await interaction.reply({ embeds: [embed], ephemeral: true });
-		}
+		if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+		if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+
 		const embed = new EmbedBuilder()
 			.setTitle('🏓 Pong!')
 			.setDescription(`Latency is ${Date.now() - interaction.createdTimestamp}ms.`)

@@ -23,12 +23,9 @@ module.exports = {
             .setDescription('List all achievements.')
         ),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-                .setColor(Colors.error);
-            return await interaction.reply({ embeds: [embed], ephemeral: true });
-        }
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+
         const subcommand = interaction.options.getSubcommand();
         if (subcommand === 'links') {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
@@ -48,7 +45,6 @@ module.exports = {
             }
     
             const embed = new EmbedBuilder()
-                .setTitle('Link Dispensers')
                 .setDescription('Here are all the configured link dispensers in your guild.')
                 .setColor(Colors.normal);
             
@@ -73,7 +69,7 @@ module.exports = {
 
             if (!panel.panels.length > 0 || !panel.panels) {
                 const embed = new EmbedBuilder()
-                    .setDescription(Emojis.error + ' There are no panels configued in this guild.')
+                    .setDescription(Emojis.error + ' There are no panels configured in this guild.')
                     .setColor(Colors.error);
                 return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
@@ -87,7 +83,7 @@ module.exports = {
             }
             const embed = new EmbedBuilder()
                 .setTitle(interaction.guild.name + '\'s panels')
-                .setDescription("These are all the configued panels in this guild.")
+                .setDescription("These are all the configured panels in this guild.")
                 .setColor(Colors.normal);
             for (let i = 0; i < panelNames.length; i++) {
                 embed.addFields(
@@ -117,7 +113,7 @@ module.exports = {
 
             const embed = new EmbedBuilder()
                 .setTitle(interaction.guild.name + '\'s achievements')
-                .setDescription("These are all the configued achievements in this guild.")
+                .setDescription("These are all the configured achievements in this guild.")
                 .setColor(Colors.normal);
             
             for (let i = 0; i < achievements.achievements.length; i++) {

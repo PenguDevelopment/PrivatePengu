@@ -10,18 +10,17 @@ module.exports = {
         .addUserOption(option => option.setName('user').setDescription('The user to report.').setRequired(true))
         .addStringOption(option => option.setName('reason').setDescription('The reason for the report.').setRequired(true)),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-                .setColor(Colors.error);
-            return await interaction.reply({ embeds: [embed], ephemeral: true });
-        }
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
         // check if report channel exists
         const guild = await guilds.findOne({
             guildID: interaction.guild.id
         });
         if (!guild.reportChannel) {
-            return await interaction.reply('The report channel has not been set.');
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' You have not set a report channel.')
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
         const user = interaction.options.getUser('user');
         const reason = interaction.options.getString('reason');
@@ -40,9 +39,17 @@ module.exports = {
 
         await reportChannel.send({
             embeds: [embed]
+        }).catch(err => {
+            const embed = new EmbedBuilder()
+                .setDescription(Emojis.error + ' I was unable to send the report message.')
+                .setColor(Colors.error);
+            return interaction.reply({ embeds: [embed], ephemeral: true });
         });
 
         // send confirmation message
-        await interaction.reply({ content: `Reported ${user} for ${reason}.`, ephemeral: true });
+        const embed2 = new EmbedBuilder()
+            .setDescription(Emojis.success + ' You have successfully reported the user.')
+            .setColor(Colors.success);
+        await interaction.reply({ embeds: [embed2], ephemeral: true });
     }
 };

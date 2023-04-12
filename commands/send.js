@@ -17,19 +17,20 @@ module.exports = {
             .addChannelOption(option => option.setName('channel').setDescription('The channel to send the panel to.').setRequired(true))
         ),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-                .setColor(Colors.error);
-            return await interaction.reply({ embeds: [embed], ephemeral: true });
-        }
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.ManageMessages)) return interaction.reply('I need the `Manage Messages` permission to run this command.');
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.AddReactions)) return interaction.reply('I need the `Add Reactions` permission to run this command.');
+
         let subcommand = interaction.options.getSubcommand();
 
         if (subcommand === 'link') {
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
-            // check if have permission
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' You do not have permission to use this command.')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             const linkName = interaction.options.getString('link-name');
             const channel = interaction.options.getChannel('channel');
@@ -37,7 +38,10 @@ module.exports = {
             // find link
             const link = await linkSchema.findOne({ guildID: guild });
             if (!link) {
-                return await interaction.reply({ content: `You have no link dispensers in your server.`, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' You have no link dispensers in your server.')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             let targetlink;
             for(let i = 0; i< link.links.length; i++) {
@@ -47,7 +51,10 @@ module.exports = {
                 }
             }
             if(!targetlink) {
-                return await interaction.reply({ content: `The link dispenser \`${linkName}\` does not exist.`, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` The link dispenser \`${linkName}\` does not exist.`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             // send link
             const linkEmbed = new EmbedBuilder()
@@ -61,7 +68,15 @@ module.exports = {
                         .setStyle(ButtonStyle.Primary)
                         .setCustomId(`get-link-${linkName}`)
                 );
-            const message = await channel.send({ embeds: [linkEmbed], components: [linkRow] });
+
+            await channel.send({ embeds: [linkEmbed], components: [linkRow] }).catch(
+                () => {
+                    const embed = new EmbedBuilder()
+                        .setDescription(Emojis.error + ` I do not have permission to send messages in ${channel}.`)
+                        .setColor(Colors.error);
+                    return interaction.reply({ embeds: [embed], ephemeral: true });
+                }
+            ) ;
 
             const embed = new EmbedBuilder()
                 .setTitle('Success!')
@@ -72,7 +87,10 @@ module.exports = {
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
             // check if have permission
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' You do not have permission to use this command.')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             const panelName = interaction.options.getString('panel-name');
             const channel = interaction.options.getChannel('channel');
@@ -80,7 +98,10 @@ module.exports = {
             // find panel
             const panel = await selfroles.findOne({ guildID: guild });
             if (!panel) {
-                return await interaction.reply({ content: `You have no panels in your server.`, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' You have no panels in your server.')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             let targetPanel;
             for(let i = 0; i< panel.panels.length; i++) {
@@ -90,7 +111,10 @@ module.exports = {
                 }
             }
             if(!targetPanel) {
-                return await interaction.reply({ content: `The panel \`${panelName}\` does not exist.`, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` The panel \`${panelName}\` does not exist.`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             // send panel
             const panelEmbed = new EmbedBuilder()
@@ -103,13 +127,17 @@ module.exports = {
             const message = await channel.send({ embeds: [panelEmbed] });
             for (const role of targetPanel.roles) {
                 await message.react(role.emoji).catch(
-                    () => interaction.reply({ content: `The emoji \`${role.emoji}\` is invalid.`, ephemeral: true })
+                    () => {
+                        const embed = new EmbedBuilder()
+                            .setDescription(Emojis.error + ` I do not have permission to react in ${channel} or the emoji is invalid.`)
+                            .setColor(Colors.error);
+                        return interaction.reply({ embeds: [embed], ephemeral: true });
+                    }
                 );
             }
             const embed = new EmbedBuilder()
-                .setTitle('Success!')
-                .setDescription(`Sent the panel \`${panelName}\` to ${channel}.`)
-                .setColor(randomColor);
+                .setDescription(Emojis.success + ` Sent the panel \`${panelName}\` to ${channel}.`)
+                .setColor(Colors.success);
             await interaction.reply({ embeds: [embed], ephemeral: true });
         }
     }

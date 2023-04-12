@@ -12,12 +12,9 @@ module.exports = {
         .setDescription('Suggest something!')
         .addStringOption(option => option.setName('suggestion').setDescription('The suggestion to send.').setRequired(true)),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-                .setColor(Colors.error);
-            return await interaction.reply({ embeds: [embed], ephemeral: true });
-        }
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+
         const suggestion = interaction.options.getString('suggestion');
         const guilds = await guild.findOne({ guildID: interaction.guild.id });
         function genId(length) {
@@ -33,10 +30,9 @@ module.exports = {
         var id = genId(8);
         if (!guilds) {
             const embed = new EmbedBuilder()
-                // .setTitle('Error!')
                 .setDescription(Emojis.error + ' This server does not have suggestions channel set up.')
                 .setColor(Colors.error)
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
         } else if (!guilds.acceptChannel) {
             const embed = new EmbedBuilder()
                 .setDescription(Emojis.error + ' You must set a review channel before sending a suggestion.')
@@ -68,7 +64,6 @@ module.exports = {
         const msg = await reviewChannel.send({ embeds: [embed], components: [row] });
         // reply success
         const embed2 = new EmbedBuilder()
-            // .setTitle('Success!')
             .setDescription(Emojis.success + ` Your suggestion has been submitted for review.`)
             .setColor(Colors.success)
         await interaction.reply({ embeds: [embed2], ephemeral: true });

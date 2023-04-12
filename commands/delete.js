@@ -47,29 +47,32 @@ module.exports = {
         ),
 
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-                .setColor(Colors.error);
-            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) {
+            return;
         }
+
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return await interaction.reply({ content: 'You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
+            const errorEmbed = new EmbedBuilder()
+                .setDescription(Emojis.error + ` You do not have permission to use this command. (Requires \`ADMINISTRATOR\`)`)
+                .setColor(Colors.error);
+            return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
         }
+
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+
         const subcommand = interaction.options.getSubcommand();
         if (subcommand === 'panel') {
-            var randomColor = Math.floor(Math.random()*16777215).toString(16);
             const panelName = interaction.options.getString('panel');
             const guild = interaction.guild.id;
-            // find panel and delete it
+
             const panel = await selfroles.findOne({ guildID: guild});
             if (!panel) {
                 const errorEmbed = new EmbedBuilder()
-                    //.setTitle('Error!')
                     .setDescription(Emojis.error + ` This guild does not have any panels configured.`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
+
             let targetPanel;
             for(let i = 0; i< panel.panels.length; i++) {
                 if(panel.panels[i].panelName === panelName) {
@@ -79,10 +82,9 @@ module.exports = {
             }
             if(!targetPanel) {
                 const errorEmbed = new EmbedBuilder()
-                    //.setTitle('Error!')
                     .setDescription(Emojis.error + ` This panel does not exist.`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
             await selfroles.updateOne({
                 guild,
@@ -108,7 +110,7 @@ module.exports = {
                 const errorEmbed = new EmbedBuilder()
                     .setDescription(Emojis.error + ` This guild has no achievements configured.`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
             let targetAchievement;
             for(let i = 0; i< achievement.achievements.length; i++) {
@@ -121,7 +123,7 @@ module.exports = {
                 const errorEmbed = new EmbedBuilder()
                     .setDescription(Emojis.error + ` The achievement \`${achivmentName}\` does not exist.`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
 
             await achivment.updateOne({
@@ -136,7 +138,6 @@ module.exports = {
             })
 
             const successEmbed = new EmbedBuilder()
-                //.setTitle('Success!')
                 .setDescription(Emojis.success + ` The achievement \`${achivmentName}\` was deleted.`)
                 .setColor(Colors.success);
             await interaction.reply({ embeds: [successEmbed] });
@@ -145,19 +146,17 @@ module.exports = {
                 const errorEmbed = new EmbedBuilder()
                     .setDescription(Emojis.error + ` You do not have permission to use this command. (Requires \`ADMINISTRATOR\`)`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
-            // var randomColor = Math.floor(Math.random()*16777215).toString(16);
             const linkName = interaction.options.getString('link');
             const guild = interaction.guild.id;
-            // find panel and delete it
             const link = await linkSchema.findOne({ guildID: guild});
+
             if (!link) {
                 const errorEmbed = new EmbedBuilder()
-                    //.setTitle('Error!')
                     .setDescription(Emojis.error + ` This guild has no link dispensers configured.`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
             let targetLink;
             for(let i = 0; i < link.links.length; i++) {
@@ -168,10 +167,9 @@ module.exports = {
             }
             if(!targetLink) {
                 const errorEmbed = new EmbedBuilder()
-                    //.setTitle('Error!')
                     .setDescription(Emojis.error + ` The link dispenser \`${linkName}\` does not exist.`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
             await selfroles.updateOne({
                 guild,
@@ -192,7 +190,7 @@ module.exports = {
                 const errorEmbed = new EmbedBuilder()
                     .setDescription(Emojis.error + ` You do not have permission to use this command. (Requires \`ADMINISTRATOR\`)`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
 
             const role = interaction.options.getRole('role');
@@ -202,7 +200,7 @@ module.exports = {
                 const errorEmbed = new EmbedBuilder()
                     .setDescription(Emojis.error + ` This guild has no rainbow roles configured.`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
             
             let targetRole;
@@ -218,7 +216,7 @@ module.exports = {
                 const errorEmbed = new EmbedBuilder()
                     .setDescription(Emojis.error + ` The role \`${role.name}\` is not a rainbow role.`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [errorEmbed] });
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
 
             await rainbowSchema.updateOne({

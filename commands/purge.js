@@ -9,12 +9,15 @@ module.exports = {
         .setDescription('Purges a specified amount of messages. (Old messages are fine.)')
         .addIntegerOption(option => option.setName('amount').setDescription('The amount of messages to purge.').setRequired(true)),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
             const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-                .setColor(Colors.error);
-            return await interaction.reply({ embeds: [embed], ephemeral: true });
-        }
+                .setDescription(Emojis.error + ' I do not have permission to use this command.')
+                .setColor(Colors.error)
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        };
+        
         const amount = interaction.options.getInteger('amount');
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
@@ -26,8 +29,8 @@ module.exports = {
 
         if (amount > 100) {
             const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' You can only purge up to 100 messages.')
-                .setColor(randomColor)
+                .setDescription(Emojis.error + ' You can only purge up to 100 messages at a time.')
+                .setColor(Colors.error)
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 

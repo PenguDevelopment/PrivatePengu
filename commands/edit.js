@@ -13,149 +13,156 @@ module.exports = {
                 .addStringOption(option => option.setName('panel-name').setDescription('The name of the panel.').setRequired(true))
 ),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) {
+            return;
+        }
+
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
+                .setDescription(Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)')
                 .setColor(Colors.error);
             return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            return await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
-        }
-        // get panel name and subcommand
+
         const subcommand = interaction.options.getSubcommand();
         if (subcommand === 'panel') {
-            var randomColor = Math.floor(Math.random()*16777215).toString(16);
-            // get the panel name (how this is going to work is basicly the bot will send a message with all the fields and then you can edit them)
             const panelName = interaction.options.getString('panel-name');
-            // find panel
             const guild = interaction.guild.id;
 
             const panel = await selfroles.findOne({ guildID: guild });
 
             if (!panel) {
-                return await interaction.reply({ content: `The panel \`${panelName}\` does not exist.`, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` The panel \`${panelName}\` does not exist.`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
 
             const targetPanels = panel.panels.filter(p => p.panelName.toLowerCase() === panelName.toLowerCase());
 
             if (targetPanels.length === 0) {
-                return await interaction.reply({ content: `The panel \`${panelName}\` does not exist.`, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` The panel \`${panelName}\` does not exist.`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             
             const targetPanel = targetPanels[0];
+            console.log(targetPanels);
             
             if(!targetPanel) {
-                return await interaction.reply({ content: `The panel \`${panelName}\` does not exist.`, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` The panel \`${panelName}\` does not exist.`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
+
             const embed = new EmbedBuilder()
                 .setTitle(`Editing panel \`${panelName}\``)
-                .setDescription(`What do you want to edit? (Send \`name\`, \`description\`, \`color\`, \`field\`, or \`stop\` to stop.)`)
-                .setColor(randomColor);
+                .setDescription('What do you want to edit? \n\n' + Emojis.message + ' *Send a message containing your selection, or say `cancel`.*')
+                .addFields(
+                    { name: 'Name', value: 'Change the name of the panel.', inline: true },
+                    { name: 'Description', value: 'Change the description of the panel.', inline: true },
+                    { name: 'Color', value: 'Change the color of the panel.', inline: true },
+                    { name: 'Field', value: 'Change a field in the panel.', inline: true },
+                )
+                .setColor(Colors.awaiting);
             await interaction.reply({ embeds: [embed] });
 
-            // basicly what I want is that the bot will wait for the user to send the id then edit the field with that id
             const filter = m => m.author.id === interaction.user.id;
-            const collector = interaction.channel.createMessageCollector({ filter, time: 60000 });
+            const collector = await await interaction.channel.createMessageCollector({ filter, time: 60000 });
+            try {
             collector.on('collect', async (m) => {
-                if (m.content === 'stop') {
-                    collector.stop();
+                if (m.content === 'cancel') {
+                    await collector.stop();
                     const embed = new EmbedBuilder()
-                        .setTitle(`STOP!!!!`)
-                        .setDescription(`Stopped editing panel \`${panelName}\``)
-                        .setColor(randomColor);
+                        .setDescription(Emojis.success + ` Cancelled the command.`)
+                        .setColor(Colors.success);
                     return await interaction.followUp({ embeds: [embed] });
                 }
                 if (m.content === 'name') {
                     // new collector
                     const embed = new EmbedBuilder()
-                        .setTitle(`Editing panel \`${panelName}\``)
-                        .setDescription(`What do you want to change the name to? (Send \`stop\` to stop.)`)
-                        .setColor(randomColor);
+                        .setDescription(Emojis.loading + ` What do you want to change the name to? (Send \`cancel\` to cancel.)`)
+                        .setColor(Colors.awaiting);
                     await interaction.followUp({ embeds: [embed] });
                     // collector
-                    const collector2 = interaction.channel.createMessageCollector({ filter, time: 60000 });
-                    collector.stop();
+                    const collector2 = await interaction.channel.createMessageCollector({ filter, time: 60000 });
+                    await collector.stop();
                     collector2.on('collect', async (m) => {
-                        if (m.content === 'stop') {
-                            collector2.stop();
+                        if (m.content === 'cancel') {
+                            await collector2.stop();
                             const embed = new EmbedBuilder()
-                                .setTitle(`STOP!!!!`)
-                                .setDescription(`Stopped editing panel \`${panelName}\``)
-                                .setColor(randomColor);
+                                .setDescription(Emojis.success + ` Cancelled the command.`)
+                                .setColor(Colors.success);
                             return await interaction.followUp({ embeds: [embed] });
                         }
                         // change name
                         await selfroles.updateOne({ guild, 'panels.panelName': panelName }, { $set: { 'panels.$.panelName': m.content } });
                         const embed = new EmbedBuilder()
-                            .setTitle(`Edited panel \`${panelName}\``)
-                            .setDescription(`Changed the name to \`${m.content}\``)
-                            .setColor(randomColor);
-                        return await interaction.followUp({ embeds: [embed] }) && collector2.stop();
+                            .setDescription(Emojis.success + ` Successfully changed the name to \`${m.content}\``)
+                            .setColor(Colors.success);
+                        await collector2.stop()
+                        return await interaction.followUp({ embeds: [embed] });
                     });
                 }
                 if (m.content === 'description') {
-                    // new collector
                     const embed = new EmbedBuilder()
-                        .setTitle(`Editing panel \`${panelName}\``)
-                        .setDescription(`What do you want to change the description to? (Send \`stop\` to stop.)`)
-                        .setColor(randomColor);
+                        .setDescription(Emojis.awaiting + ` What do you want to change the description to? (Send \`cancel\` to cancel.)`)
+                        .setColor(Colors.success);
                     await interaction.followUp({ embeds: [embed] });
-                    // collector
-                    const collector2 = interaction.channel.createMessageCollector({ filter, time: 60000 });
-                    collector.stop();
+
+                    const collector2 = await interaction.channel.createMessageCollector({ filter, time: 60000 });
+                    await collector.stop();
                     collector2.on('collect', async (m) => {
-                        if (m.content === 'stop') {
-                            collector2.stop();
+                        if (m.content === 'cancel') {
+                            await collector2.stop();
                             const embed = new EmbedBuilder()
-                                .setTitle(`STOP!!!!`)
-                                .setDescription(`Stopped editing panel \`${panelName}\``)
-                                .setColor(randomColor);
+                                .setDescription(Emojis.success + ` Cancelled the command.`)
+                                .setColor(Colors.success);
                             return await interaction.followUp({ embeds: [embed] });
                         }
-                        // change description
                         await selfroles.updateOne({ guild, 'panels.panelName': panelName }, { $set: { 'panels.$.panelDescription': m.content } });
                         const embed = new EmbedBuilder()
-                            .setTitle(`Edited panel \`${panelName}\``)
-                            .setDescription(`Changed the description to \`${m.content}\``)
-                            .setColor(randomColor);
-                        return await interaction.followUp({ embeds: [embed] }) && collector2.stop();
+                            .setDescription(Emojis.success + ` Successfully changed the description to \`${m.content}\``)
+                            .setColor(Colors.success);
+                            await collector2.stop();
+                        return await interaction.followUp({ embeds: [embed] });
                     });
                 }
                 if (m.content === 'color') {
                     // new collector
                     const embed = new EmbedBuilder()
-                        .setTitle(`Editing panel \`${panelName}\``)
-                        .setDescription(`What do you want to change the color to? (Send \`stop\` to stop.)`)
-                        .setColor(randomColor);
+                        .setDescription(Emojis.awaiting + ` What do you want to change the color to? (Send \`cancel\` to cancel.)`)
+                        .setColor(Colors.awaiting);
                     await interaction.followUp({ embeds: [embed] });
                     // collector
-                    const collector2 = interaction.channel.createMessageCollector({ filter, time: 60000 });
-                    collector.stop();
+                    const collector2 = await interaction.channel.createMessageCollector({ filter, time: 60000 });
+                    await collector.stop();
                     collector2.on('collect', async (m) => {
                         if (m.content === 'stop') {
-                            collector2.stop();
+                            await collector2.stop();
                             const embed = new EmbedBuilder()
-                                .setTitle(`STOP!!!!`)
-                                .setDescription(`Stopped editing panel \`${panelName}\``)
-                                .setColor(randomColor);
+                                .setDescription(Emojis.success + ` Cancelled the command.`)
+                                .setColor(Colors.success);
                             return await interaction.followUp({ embeds: [embed] });
                         }
                         // change color
                         await selfroles.updateOne({ guild, 'panels.panelName': panelName }, { $set: { 'panels.$.panelColor': m.content } });
+                        await collector2.stop()
                         const embed = new EmbedBuilder()
-                            .setTitle(`Edited panel \`${panelName}\``)
-                            .setDescription(`Changed the color to \`${m.content}\``)
-                            .setColor(randomColor);
-                        return await interaction.followUp({ embeds: [embed] }) && collector2.stop();
+                            .setDescription(Emojis.success + ` Successfully changed the color to \`${m.content}\``)
+                            .setColor(Colors.success);
+                        return await interaction.followUp({ embeds: [embed] });
                     });
                 }
                 if (m.content === 'field') {
                     // we need the id
                     const embed = new EmbedBuilder()
-                        .setTitle(`Editing panel \`${panelName}\``)
-                        .setDescription(`What field do you want to edit? (Send id or \`stop\` to stop.)`)
-                        .setColor(randomColor);
+                        .setDescription(Emojis.awaiting + ` What field do you want to edit? (Send \`cancel\` to cancel.)`)
+                        .setColor(Colors.awaiting);
                     // there is no field.id so your going to have to loop over from 0 plus fields.length is not defined
                     for (let i = 0; i < targetPanel.fields.length; i++) {
                         const field = targetPanel.fields[i];
@@ -168,16 +175,14 @@ module.exports = {
                     }
                     await interaction.followUp({ embeds: [embed] });
                     // collector
-                    const collector2 = interaction.channel.createMessageCollector({ filter, time: 60000 });
-                    collector.stop();
+                    const collector2 = await interaction.channel.createMessageCollector({ filter, time: 60000 });
+                    await collector.stop();
                     collector2.on('collect', async (m) => {
-                        // stop
-                        if (m.content === 'stop') {
-                            collector2.stop();
+                        if (m.content === 'cancel') {
+                            await collector2.stop();
                             const embed = new EmbedBuilder()
-                                .setTitle(`STOP!!!!`)
-                                .setDescription(`Stopped editing panel \`${panelName}\``)
-                                .setColor(randomColor);
+                                .setDescription(Emojis.success + ` Cancelled the command.`)
+                                .setColor(Colors.success);
                             return await interaction.followUp({ embeds: [embed] });
                         }
                         // check if its a number
@@ -188,105 +193,96 @@ module.exports = {
                         if (m.content > targetPanel.fields.length) {
                             return;
                         }
-                        // get the field
-                        const field = targetPanel.fields[m.content];
+
                         const id = m.content;
                         // new collector
                         const embed = new EmbedBuilder()
-                            .setTitle(`Editing panel \`${panelName}\``)
-                            .setDescription(`What do you want to change? (Send \`name\`, \`description\`, \`inline\` or \`stop\` to stop.)`)
-                            .setColor(randomColor);
+                            .setDescription(Emojis.awaiting + ` What do you want to change the field to? (Send \`cancel\` to cancel.)`)
+                            .setColor(Colors.awaiting);
                         await interaction.followUp({ embeds: [embed] });
                         // collector
-                        const collector3 = interaction.channel.createMessageCollector({ filter, time: 60000 });
-                        collector2.stop();
+                        const collector3 = await interaction.channel.createMessageCollector({ filter, time: 60000 });
+                        await collector2.stop();
                         collector3.on('collect', async (m) => {
                             // stop
-                            if (m.content === 'stop') {
-                                collector3.stop();
+                            if (m.content === 'cancel') {
+                                await collector3.stop();
                                 const embed = new EmbedBuilder()
-                                    .setTitle(`STOP!!!!`)
-                                    .setDescription(`Stopped editing panel \`${panelName}\``)
-                                    .setColor(randomColor);
+                                    .setDescription(Emojis.success + ` Cancelled the command.`)
+                                    .setColor(Colors.success);
                                 return await interaction.followUp({ embeds: [embed] });
                             }
                             // name
                             if (m.content === 'name') {
                                 // new collector
                                 const embed = new EmbedBuilder()
-                                    .setTitle(`Editing panel \`${panelName}\``)
-                                    .setDescription(`What do you want to change the name to? (Send \`stop\` to stop.)`)
-                                    .setColor(randomColor);
+                                    .setDescription(Emojis.awaiting + ` What do you want to change the name to? (Send \`cancel\` to cancel.)`)
+                                    .setColor(Colors.awaiting);
                                 await interaction.followUp({ embeds: [embed] });
                                 // collector
-                                const collector4 = interaction.channel.createMessageCollector({ filter, time: 60000 });
-                                collector3.stop();
+                                const collector4 = await interaction.channel.createMessageCollector({ filter, time: 60000 });
+                                await collector3.stop();
                                 collector4.on('collect', async (m) => {
                                     // stop
-                                    if (m.content === 'stop') {
-                                        collector4.stop();
+                                    if (m.content === 'cancel') {
+                                        await collector4.stop();
                                         const embed = new EmbedBuilder()
-                                            .setTitle(`STOP!!!!`)
-                                            .setDescription(`Stopped editing panel \`${panelName}\``)
-                                            .setColor(randomColor);
+                                            .setDescription(Emojis.success + ` Cancelled the command.`)
+                                            .setColor(Colors.success);
                                         return await interaction.followUp({ embeds: [embed] });
                                     }
                                     await selfroles.updateOne({ guild, 'panels.panelName': panelName }, { $set: { [`panels.$.fields.${id}.fieldName`]: m.content } });
                                     const embed = new EmbedBuilder()
-                                        .setTitle(`Edited panel \`${panelName}\``)
-                                        .setDescription(`Changed the name to \`${m.content}\``)
-                                        .setColor(randomColor);
-                                    return await interaction.followUp({ embeds: [embed] }) && collector4.stop();
+                                        .setDescription(Emojis.success + ` Successfully changed the name to \`${m.content}\``)
+                                        .setColor(Colors.success);
+                                    await collector4.stop()
+                                    return await interaction.followUp({ embeds: [embed] });
                                 });
                             }
                             // description
                             if (m.content === 'description') {
                                 // new collector
                                 const embed = new EmbedBuilder()
-                                    .setTitle(`Editing panel \`${panelName}\``)
-                                    .setDescription(`What do you want to change the description to? (Send \`stop\` to stop.)`)
-                                    .setColor(randomColor);
+                                    .setDescription(Emojis.awaiting + ` What do you want to change the description to? (Send \`cancel\` to cancel.)`)
+                                    .setColor(Colors.awaiting);
                                 await interaction.followUp({ embeds: [embed] });
                                 // collector
-                                const collector4 = interaction.channel.createMessageCollector({ filter, time: 60000 });
-                                collector3.stop();
+                                const collector4 = await interaction.channel.createMessageCollector({ filter, time: 60000 });
+                                await collector3.stop();
                                 collector4.on('collect', async (m) => {
                                     // stop
-                                    if (m.content === 'stop') {
-                                        collector4.stop();
+                                    if (m.content === 'cancel') {
+                                        await collector4.stop();
                                         const embed = new EmbedBuilder()
-                                            .setTitle(`STOP!!!!`)
-                                            .setDescription(`Stopped editing panel \`${panelName}\``)
-                                            .setColor(randomColor);
+                                            .setDescription(Emojis.success + ` Cancelled the command.`)
+                                            .setColor(Colors.success);
                                         return await interaction.followUp({ embeds: [embed] });
                                     }
                                     // change description
                                     await selfroles.updateOne({ guild, 'panels.panelName': panelName }, { $set: { [`panels.$.fields.${id}.fieldValue`]: m.content } });
                                     const embed = new EmbedBuilder()
-                                        .setTitle(`Edited panel \`${panelName}\``)
-                                        .setDescription(`Changed the description to \`${m.content}\``)
-                                        .setColor(randomColor);
-                                    return await interaction.followUp({ embeds: [embed] }) && collector4.stop();
+                                        .setDescription(Emojis.success + ` Successfully changed the description to \`${m.content}\``)
+                                        .setColor(Colors.success);
+                                    await collector4.stop()
+                                    return await interaction.followUp({ embeds: [embed] });
                                 });
                             }
                             if (m.content === 'inline') {
                                 // new collector
                                 const embed = new EmbedBuilder()
-                                    .setTitle(`Editing panel \`${panelName}\``)
-                                    .setDescription(`What do you want to change the inline to? (true/false, Send \`stop\` to stop.))`)
-                                    .setColor(randomColor);
+                                    .setDescription(Emojis.awaiting + ` What do you want to change the inline to? (Send \`cancel\` to cancel.)`)
+                                    .setColor(Colors.awaiting);
                                 await interaction.followUp({ embeds: [embed] });
                                 // collector
-                                const collector4 = interaction.channel.createMessageCollector({ filter, time: 60000 });
-                                collector3.stop();
+                                const collector4 = await interaction.channel.createMessageCollector({ filter, time: 60000 });
+                                await collector3.stop();
                                 collector4.on('collect', async (m) => {
                                     // stop
-                                    if (m.content === 'stop') {
-                                        collector4.stop();
+                                    if (m.content === 'cancel') {
+                                        await collector4.stop();
                                         const embed = new EmbedBuilder()
-                                            .setTitle(`STOP!!!!`)
-                                            .setDescription(`Stopped editing panel \`${panelName}\``)
-                                            .setColor(randomColor);
+                                            .setDescription(Emojis.success + ` Cancelled the command.`)
+                                            .setColor(Colors.success);
                                         return await interaction.followUp({ embeds: [embed] });
                                     }
                                     // check if its a boolean
@@ -296,25 +292,30 @@ module.exports = {
                                     // change inline
                                     await selfroles.updateOne({ guild, 'panels.panelName': panelName }, { $set: { [`panels.$.fields.${id}.inline`]: m.content } });
                                     const embed = new EmbedBuilder()
-                                        .setTitle(`Edited panel \`${panelName}\``)
-                                        .setDescription(`Changed the inline to \`${m.content}\``)
-                                        .setColor(randomColor);
-                                    return await interaction.followUp({ embeds: [embed] }) && collector4.stop();
+                                        .setDescription(Emojis.success + ` Successfully changed the inline to \`${m.content}\``)
+                                        .setColor(Colors.success);
+                                    await collector4.stop()
+                                    return await interaction.followUp({ embeds: [embed] });
                                 });
                             }
                             // stop
-                            if (m.content === 'stop') {
-                                collector3.stop();
+                            if (m.content === 'cancel') {
+                                await collector3.stop();
                                 const embed = new EmbedBuilder()
-                                    .setTitle(`STOP!!!!`)
-                                    .setDescription(`Stopped editing panel \`${panelName}\``)
-                                    .setColor(randomColor);
+                                    .setDescription(Emojis.success + ` Cancelled the command.`)
+                                    .setColor(Colors.success);
                                 return await interaction.followUp({ embeds: [embed] });
                             }
                         });
                     });
                 }
         });
+    } catch (err) {
+        const embed = new EmbedBuilder()
+            .setDescription(Emojis.error + ` An error occurred while running the command: \`${err.message}\` \n Report this to pengudev server!`)
+            .setColor(Colors.error);
+        return await interaction.followUp({ embeds: [embed] }).catch(() => {});
+        }
     }
     }
 }

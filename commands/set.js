@@ -142,12 +142,13 @@ module.exports = {
             .addBooleanOption(option => option.setName('mention').setDescription('Do you want a mention on the outside of the embed?').setRequired(true))
         ),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
-            const embed = new EmbedBuilder()
-                .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-                .setColor(Colors.error);
-            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.SendMessages)) {
+            return;
         }
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.EmbedLinks)) {
+            return await interaction.reply({ content: Emojis.error + ' I do not have permission to send embeds.', ephemeral: true });
+        }
+
         const subcommand = interaction.options.getSubcommand();
         if (subcommand === 'role') {
             const guild = interaction.guild.id;
@@ -162,8 +163,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setDescription(Emojis.error + ' You do not have permission to use this command.')
                     .setColor(Colors.error)
-                    .setTimestamp()
-                return interaction.reply({ embeds: [embed], ephemeral: true });
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             if (!pingRole) {
                 pingRole = 'none';
@@ -188,15 +188,13 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setDescription(Emojis.success + ` Successfully set a role alert for ${role.name}.`)
                 .setColor(Colors.success)
-                .setTimestamp()
             return await interaction.reply({ embeds: [embed] });
         } else if (subcommand === 'report') {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
                 const embed = new EmbedBuilder()
                     .setDescription(Emojis.error + ' You do not have permission to use this command.')
                     .setColor(Colors.error)
-                    .setTimestamp()
-                return interaction.reply({ embeds: [embed], ephemeral: true });
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             const channel = interaction.options.getChannel('channel');
 
@@ -216,8 +214,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setDescription(Emojis.error + ' You do not have permission to use this command.')
                     .setColor(Colors.error)
-                    .setTimestamp()
-                return interaction.reply({ embeds: [embed], ephemeral: true });
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
 
             const channel = interaction.options.getString('channel');
@@ -241,14 +238,13 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setDescription(Emojis.success + ` The leave message has been set to the following:\n\n**Channel:** ${channel}\n**Title:** \`${title}\`\n**Color:** \`${color}\`\n**Message:** \`${message}\``)
                 .setColor(Colors.success)
-                .setTimestamp()
             await interaction.reply({ embeds: [embed] });
         } else if (subcommand === 'review') {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
                 const embed = new EmbedBuilder()
                     .setDescription(Emojis.error + ' You do not have permission to use this command.')
                     .setColor(Colors.error)
-                return interaction.reply({ embeds: [embed], ephemeral: true });
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
 
             const guilds = await guild.findOne({ guildID: interaction.guild.id });
@@ -258,7 +254,7 @@ module.exports = {
                     .setDescription(Emojis.error + ' You must set a suggestion channel before setting a review channel.')
                     .setColor(Colors.error)
     
-                return interaction.reply({ embeds: [embed], ephemeral: true });
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             } else {
                 
             const data = await guild.findOne({ guildID: interaction.guild.id });
@@ -294,7 +290,7 @@ module.exports = {
                     .setColor(Colors.success)
                 
                 await guild.findOneAndDelete({ guildID: interaction.guild.id });
-                return interaction.reply({ embeds: [embed] });;
+                return await interaction.reply({ embeds: [embed] });;
             }
             // if suggestion channel already exists, update it
             let data = await guild.findOne({ guildID: interaction.guild.id });
@@ -322,7 +318,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setDescription(Emojis.error + ' You do not have permission to use this command.')
                     .setColor(Colors.error)
-                return interaction.reply({ embeds: [embed], ephemeral: true });
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             
             const channel = interaction.options.getString('channel');

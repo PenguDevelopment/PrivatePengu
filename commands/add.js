@@ -85,26 +85,30 @@ module.exports = {
                 ))
         ),
         async execute(interaction) {
-            if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                const embed = new EmbedBuilder()
-                    .setDescription(Emojis.error + ' I do not have permission to use this command. (Requires `ADMINISTRATOR`)')
-                    .setColor(Colors.error);
-                return await interaction.reply({ embeds: [embed], ephemeral: true });
+            if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) {
+                return;
             }
-
+            if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+            
             const subcommand = interaction.options.getSubcommand();
             if (subcommand === 'role') {
                 if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                    return await interaction.reply({ content: Emojis.error + 'You do not have permission to use this command. (Requires `ADMINISTRATOR`)', ephemeral: true });
+                    const embed = new EmbedBuilder()
+                        .setDescription(Emojis.error + ' You need the `Administrator` permission to use this command.')
+                        .setColor(Colors.error);
+                    return await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
                 const panelName = interaction.options.getString('panel-name');
                 const role = interaction.options.getRole('role');
                 let emoji = interaction.options.getString('emoji');
                 const guild = interaction.guild.id;
-                // find panel
+
                 const panel = await selfroles.findOne({ guildID: guild });
                 if (!panel) {
-                    return await interaction.reply({ content: Emojis.error + ` This guild doesn't have any panels configured.`, ephemeral: true });
+                    const embed = new EmbedBuilder()
+                        .setDescription(Emojis.error + ' There are no selfrole panels in this server.')
+                        .setColor(Colors.error);
+                    return await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
                 let targetPanel;
                 for(let i = 0; i< panel.panels.length; i++) {
@@ -114,29 +118,44 @@ module.exports = {
                     }
                 }
                 if(!targetPanel) {
-                    return await interaction.reply({ content: Emojis.error + ` The panel \`${panelName}\` does not exist.`, ephemeral: true });
+                    const embed = new EmbedBuilder()
+                        .setDescription(Emojis.error + ` The panel \`${panelName}\` does not exist.`)
+                        .setColor(Colors.error);
+                    return await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
+                
                 if(emoji.startsWith(':') && emoji.endsWith(':')) {
                     const emojiFromCache = interaction.client.emojis.cache.find(emoji => emoji.name === emoji.slice(1, -1));
                     if (!emojiFromCache) {
-                        return await interaction.reply({ content: Emojis.error + ` The emoji \`${emoji}\` is invalid.`, ephemeral: true });
+                        const embed = new EmbedBuilder()
+                            .setDescription(Emojis.error + ` The emoji \`${emoji}\` is invalid.`)
+                            .setColor(Colors.error);
+                        return await interaction.reply({ embeds: [embed], ephemeral: true });
                     }
                     emoji = emojiFromCache.toString();
                 }
             
-                // check if role is already in panel
                 for (const roler of targetPanel.roles) {
                     if (roler.roleID === role.id) {
-                        return await interaction.reply({ content: Emojis.error + ` The role \`${role.name}\` already exists in the \`${panelName}\` panel.`, ephemeral: true });
+                        const embed = new EmbedBuilder()
+                            .setDescription(Emojis.error + ` The role \`${role.name}\` already exists in the \`${panelName}\` panel.`)
+                            .setColor(Colors.error);
+                        return await interaction.reply({ embeds: [embed], ephemeral: true });
                     }
                 }
                 // check if emoji is already in panel
                 if (targetPanel.roles.find(r => r.emoji === emoji)) {
-                    return await interaction.reply({ content: Emojis.error + ` The emoji \`${emoji}\` already exists in the \`${panelName}\` panel.`, ephemeral: true });
+                    const embed = new EmbedBuilder()
+                        .setDescription(Emojis.error + ` The emoji \`${emoji}\` already exists in the \`${panelName}\` panel.`)
+                        .setColor(Colors.error);
+                    return await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
                 
                 if (targetPanel.roles.length >= 20) {
-                    return await interaction.reply({ content: Emojis.error + ` The panel \`${panelName}\` already has 20 roles, and cannot add any more.`, ephemeral: true });
+                    const embed = new EmbedBuilder()
+                        .setDescription(Emojis.error + ` The panel \`${panelName}\` already has 20 roles, and cannot add any more.`)
+                        .setColor(Colors.error);
+                    return await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
                 await selfroles.updateOne({
                     guild,
@@ -150,21 +169,27 @@ module.exports = {
                     }
                 })
             const successEmbed = new EmbedBuilder()
-                //.setTitle('Success!')
                 .setDescription(Emojis.error + ` Added the \`${role.name}\` role to the \`${panelName}\` panel.`)
                 .setColor(Colors.success);
             await interaction.reply({ embeds: [successEmbed] });
         } else if (subcommand === 'link') {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command.', ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' You need the `Administrator` permission to use this command.')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
+
             const linkName = interaction.options.getString('link-name');
             const link = interaction.options.getString('link');
             const guild = interaction.guild.id;
-            // find panel
+
             const links = await linksSchema.findOne({ guildID: guild });
             if (!links) {
-                return await interaction.reply({ content: Emojis.error + ` This server has no link dispensers active.`, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' This server has no link dispensers.')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
             let targetLink;
             for(let i = 0; i< links.links.length; i++) {
@@ -174,13 +199,18 @@ module.exports = {
                 }
             }
             if(!targetLink) {
-                return await interaction.reply({ content: Emojis.error + ` The link dispenser \`${linkName}\` does not exist.`, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` The link dispenser \`${linkName}\` does not exist.`)
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
             }
         
-            // check if link is already in panel
             for (const link of targetLink.links) {
                 if (link.link === link) {
-                    return await interaction.reply({ content: Emojis.error + ` \`${link}\` already exists in \`${linkName}\` dispenser.`, ephemeral: true });
+                    const embed = new EmbedBuilder()
+                        .setDescription(Emojis.error + ` \`${link}\` already exists in \`${linkName}\` dispenser.`)
+                        .setColor(Colors.error);
+                    return await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
             }
             
@@ -200,15 +230,15 @@ module.exports = {
             await interaction.reply({ embeds: [successEmbed], ephemeral: true });
         } else if (subcommand === 'requirement') {
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
-            // check if have permission
+
             const guild = interaction.guild.id;
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
                 const noPermEmbed = new EmbedBuilder()
-                    //.setTitle('Error!')
                     .setDescription(Emojis.error + ' You do not have permission to use this command. (Requires `ADMINISTRATOR`)')
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [noPermEmbed] });
+                return await interaction.reply({ embeds: [noPermEmbed], ephemeral: true });
             }
+
             const name = interaction.options.getString('name');
             const achievement = await achivment.findOne({
                 guildID: guild,
@@ -216,10 +246,9 @@ module.exports = {
               });
               if (!achievement) {
                 const noAchievementEmbed = new EmbedBuilder()
-                    //.setTitle('Error!')
                     .setDescription(Emojis.error + ` The achievement \`${name}\` does not exist.`)
                     .setColor(Colors.error);
-                return await interaction.reply({ embeds: [noAchievementEmbed] });
+                return await interaction.reply({ embeds: [noAchievementEmbed], ephemeral: true });
             }
             const startEmbed = new EmbedBuilder()
                 .setTitle('Add Requirement')
@@ -235,10 +264,12 @@ module.exports = {
                 )
                 .setColor(Colors.awaiting);
             await interaction.reply({ embeds: [startEmbed] });
+
             let type;
             let amount;
             const filter = m => m.author.id === interaction.user.id;
             const collector = interaction.channel.createMessageCollector({ filter, time: 60000 });
+            try {
             collector.on('collect', async (m) => {
                 if (m.author.bot) return;
                 let c = m.content.toLowerCase();
@@ -254,7 +285,6 @@ module.exports = {
         
                     if (messagesRequirement) {
                         const alreadyExistsEmbed = new EmbedBuilder()
-                            // .setTitle('Error!')
                             .setDescription(Emojis.error + ' The messages requirement already exists for this achievement.')
                             .setColor(Colors.error);
                         return await interaction.followUp({ embeds: [alreadyExistsEmbed] });
@@ -271,7 +301,6 @@ module.exports = {
                         amount = m.content.toLowerCase();
                         if (amount == 'cancel') {
                             const cancelEmbed = new EmbedBuilder()
-                                // .setTitle('Cancelled')
                                 .setDescription(Emojis.success + ' Cancelled the command.')
                                 .setColor(Colors.success);
                             collector.stop();
@@ -280,7 +309,6 @@ module.exports = {
                         }
                         if (isNaN(amount)) {
                             const notNumberEmbed = new EmbedBuilder()
-                                //.setTitle('Error!')
                                 .setDescription(Emojis.error + ' Your reply must be a number.')
                                 .setColor(Colors.error);
                             return await interaction.followUp({ embeds: [notNumberEmbed] });
@@ -303,7 +331,6 @@ module.exports = {
                             }
                         );
                         const successEmbed = new EmbedBuilder()
-                            //.setTitle('Success!')
                             .setDescription(Emojis.success + ` Added the \`${type}\` requirement with an amount of \`${amount}\` to the \`${name}\` achievement.`)
                             .setColor(Colors.success);
                         await interaction.followUp({ embeds: [successEmbed] });
@@ -327,7 +354,6 @@ module.exports = {
                     }
                     type = 'voice';
                     const voiceEmbed = new EmbedBuilder()
-                        // .setTitle('Add Requirement')
                         .setDescription('**How many minutes does the user need to have to gain this achievement?**\n' + `${Emojis.message} *Please reply with your selection, or reply \`cancel\`.*`)
                         .setColor(Colors.awaiting);
                     await interaction.followUp({ embeds: [voiceEmbed] });
@@ -346,7 +372,6 @@ module.exports = {
                         }
                         if (isNaN(amount)) {
                             const notNumberEmbed = new EmbedBuilder()
-                                // .setTitle('Error!')
                                 .setDescription(Emojis.error + ' Your selection must be a number.')
                                 .setColor(Colors.error);
                             return await interaction.followUp({ embeds: [notNumberEmbed] });
@@ -369,7 +394,6 @@ module.exports = {
                             }
                         );
                         const successEmbed = new EmbedBuilder()
-                            // .setTitle('Success!')
                             .setDescription(`Added the \`${type}\` requirement with an amount of \`${amount}\` to the \`${name}\` achievement.`)
                             .setColor(Colors.success);
                         await interaction.followUp({ embeds: [successEmbed] });
@@ -378,7 +402,6 @@ module.exports = {
                     });
                 } else if (c === 'reactions') {
                     collector.stop();
-                    // check if reactions requirement already exists
                     const reactionsRequirement = await achivment.findOne({
                         guildID: guild,
                         "achievements.name": name,
@@ -386,14 +409,12 @@ module.exports = {
                     });
                     if (reactionsRequirement) {
                         const alreadyExistsEmbed = new EmbedBuilder()
-                            //.setTitle('Error!')
                             .setDescription(Emojis.error + ' The reactions requirement already exists for this achievement.')
                             .setColor(Colors.error);
                         return await interaction.followUp({ embeds: [alreadyExistsEmbed] });
                     }
                     type = 'reactions';
                     const reactionsEmbed = new EmbedBuilder()
-                        //.setTitle('Add Requirement')
                         .setDescription('**How many reactions does the user need?**\n' + Emojis.message + " *Send a message containing your selection, or type `cancel`*.")
                         .setColor(Colors.awaiting);
                     await interaction.followUp({ embeds: [reactionsEmbed] });
@@ -403,7 +424,6 @@ module.exports = {
                         amount = m.content.toLowerCase();
                         if (amount == 'cancel') {
                             const cancelEmbed = new EmbedBuilder()
-                                //.setTitle('Cancelled')
                                 .setDescription(Emojis.success + ' Command cancelled.')
                                 .setColor(Emojis.success);
                             await collector.stop();
@@ -412,7 +432,6 @@ module.exports = {
                         }
                         if (isNaN(amount)) {
                             const notNumberEmbed = new EmbedBuilder()
-                                //.setTitle('Error!')
                                 .setDescription(Emojis.error + ' Your selection must be a number.')
                                 .setColor(Emojis.error);
                             return await interaction.followUp({ embeds: [notNumberEmbed] });
@@ -435,7 +454,6 @@ module.exports = {
                             }
                         );
                         const successEmbed = new EmbedBuilder()
-                            // .setTitle('Success!')
                             .setDescription(Emojis.success + ` Added a \`${type}\` requirement with an amount of \`${amount}\` to the \`${name}\` achievement.`)
                             .setColor(Colors.success);
                         await interaction.followUp({ embeds: [successEmbed] });
@@ -452,7 +470,6 @@ module.exports = {
                     });
                     if (rolenumberRequirement) {
                         const alreadyExistsEmbed = new EmbedBuilder()
-                            // .setTitle('Error!')
                             .setDescription(Emojis.error + ' The rolenumber requirement already exists for this achievement.')
                             .setColor(Colors.error);
                         return await interaction.followUp({ embeds: [alreadyExistsEmbed] });
@@ -460,7 +477,6 @@ module.exports = {
         
                     type = 'roleNumber';
                     const roleNumberEmbed = new EmbedBuilder()
-                        // .setTitle('Add Requirement')
                         .setDescription('**How many roles does the user need?**\n' + Emojis.message + " *Send a message containing your selection, or type `cancel`.*")
                         .setColor(Colors.awaiting);
                     await interaction.followUp({ embeds: [roleNumberEmbed] });
@@ -470,7 +486,6 @@ module.exports = {
                         amount = m.content.toLowerCase();
                         if (amount == 'cancel') {
                             const cancelEmbed = new EmbedBuilder()
-                                //.setTitle('Cancelled')
                                 .setDescription(Emojis.success + ' Cancelled the command.')
                                 .setColor(Colors.success);
                             await collector.stop();
@@ -479,7 +494,6 @@ module.exports = {
                         }
                         if (isNaN(amount)) {
                             const notNumberEmbed = new EmbedBuilder()
-                                //.setTitle('Error!')
                                 .setDescription(Emojis.error + ' The amount must be a number.')
                                 .setColor(Colors.error);
                             return await interaction.followUp({ embeds: [notNumberEmbed] });
@@ -502,7 +516,6 @@ module.exports = {
                             }
                         );
                         const successEmbed = new EmbedBuilder()
-                            //.setTitle('Success!')
                             .setDescription(Emojis.success + ` Added the requirement \`${type}\` with an amount of \`${amount}\` to the achievement \`${name}\`.`)
                             .setColor(Colors.success);
                         await interaction.followUp({ embeds: [successEmbed] });
@@ -527,7 +540,6 @@ module.exports = {
         
                     type = 'role';
                     const roleEmbed = new EmbedBuilder()
-                        //.setTitle('Add Requirement')
                         .setDescription('What role would you like to add?\n' + Emojis.message + " *Send a message containing your selection, or reply `cancel`.*")
                         .setColor(Colors.awaiting);
                     await interaction.followUp({ embeds: [roleEmbed] });
@@ -537,7 +549,6 @@ module.exports = {
                         amount = m.content.toLowerCase();
                         if (amount == 'cancel') {
                             const cancelEmbed = new EmbedBuilder()
-                                // .setTitle('Cancelled')
                                 .setDescription(Emojis.success + ' Command cancelled.')
                                 .setColor(Colors.success);
                             await collector.stop();
@@ -562,7 +573,6 @@ module.exports = {
                             }
                         );
                         const successEmbed = new EmbedBuilder()
-                            //.setTitle('Success!')
                             .setDescription(Emojis.success + ` Added the requirement \`${type}\` with an amount of \`${amount}\` to the achievement \`${name}\`.`)
                             .setColor(Emojis.success);
                         await interaction.followUp({ embeds: [successEmbed] });
@@ -579,7 +589,6 @@ module.exports = {
                     });
                     if (boostsRequirement) {
                         const alreadyExistsEmbed = new EmbedBuilder()
-                            //.setTitle('Error!')
                             .setDescription(Emojis.error + ' The boosts requirement already exists for this achievement.')
                             .setColor(Colors.error);
                         return await interaction.followUp({ embeds: [alreadyExistsEmbed] });
@@ -587,7 +596,6 @@ module.exports = {
         
                     type = 'boosts';
                     const boostsEmbed = new EmbedBuilder()
-                        // .setTitle('Add Requirement')
                         .setDescription('How many boosts does the user need?\n' + Emojis.message + " *Send a message containing your selection, or type `cancel`.*")
                         .setColor(Colors.awaiting);
                     await interaction.followUp({ embeds: [boostsEmbed] });
@@ -597,7 +605,6 @@ module.exports = {
                         amount = m.content.toLowerCase();
                         if (amount == 'cancel') {
                             const cancelEmbed = new EmbedBuilder()
-                                // .setTitle('Cancelled')
                                 .setDescription(Emojis.success + ' Cancelled the command.')
                                 .setColor(Colors.success);
                             await collector.stop();
@@ -606,7 +613,6 @@ module.exports = {
                         }
                         if (isNaN(amount)) {
                             const notNumberEmbed = new EmbedBuilder()
-                                // .setTitle('Error!')  buh moment
                                 .setDescription(Emojis.error + ' The amount must be a number.')
                                 .setColor(Colors.error);
                             return await interaction.followUp({ embeds: [notNumberEmbed] });
@@ -629,7 +635,6 @@ module.exports = {
                             }
                         );
                         const successEmbed = new EmbedBuilder()
-                            // .setTitle('Success!')
                             .setDescription(Emojis.success + ` Added the requirement \`${type}\` with an amount of \`${amount}\` to the achievement \`${name}\`.`)
                             .setColor(Colors.success);
                         await interaction.followUp({ embeds: [successEmbed] });
@@ -646,7 +651,6 @@ module.exports = {
                     });
                     if (invitesRequirement) {
                         const alreadyExistsEmbed = new EmbedBuilder()
-                            // .setTitle('Error!')
                             .setDescription(Emojis.error + ' The invites requirement already exists for this achievement.')
                             .setColor(Colors.error);
                         return await interaction.followUp({ embeds: [alreadyExistsEmbed] });
@@ -654,7 +658,6 @@ module.exports = {
         
                     type = 'invites';
                     const invitesEmbed = new EmbedBuilder()
-                        // .setTitle('Add Requirement')
                         .setDescription('How many invites does the user need?\n' + Emojis.message + " *Send a message containing your selection, or type `cancel`.*")
                         .setColor(randomColor);
                     await interaction.followUp({ embeds: [invitesEmbed] });
@@ -664,7 +667,6 @@ module.exports = {
                         amount = m.content.toLowerCase();
                         if (amount == 'cancel') {
                             const cancelEmbed = new EmbedBuilder()
-                                // .setTitle('Cancelled')
                                 .setDescription(Emojis.success + ' Cancelled the command.')
                                 .setColor(Colors.success);
                             await collector.stop();
@@ -673,7 +675,6 @@ module.exports = {
                         }
                         if (isNaN(amount)) {
                             const notNumberEmbed = new EmbedBuilder()
-                                // .setTitle('Error!')
                                 .setDescription(Emojis.error + ' The amount must be a number.')
                                 .setColor(Colors.error);
                             return await interaction.followUp({ embeds: [notNumberEmbed] });
@@ -696,7 +697,6 @@ module.exports = {
                             }
                         );
                         const successEmbed = new EmbedBuilder()
-                            // .setTitle('Success!')
                             .setDescription(Emojis.success + ` Added the requirement \`${type}\` with an amount of \`${amount}\` to the achievement \`${name}\`.`)
                             .setColor(Colors.success);
                         await interaction.followUp({ embeds: [successEmbed] });
@@ -705,16 +705,26 @@ module.exports = {
                     });
                 } else if (c === 'cancel') {
                     const cancelEmbed = new EmbedBuilder()
-                        // .setTitle('Cancelled')
                         .setDescription(Emojis.success + ' Cancelled the command.')
                         .setColor(Colors.success);
                     await collector.stop();
                     return await interaction.followUp({ embeds: [cancelEmbed] });
                 }
             });
+        } catch (e) {
+            if (e.message === 'Missing Permissions') {
+                const noPermissionsEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' Something went wrong. Please make sure I have permissions.')
+                    .setColor(Colors.error);
+                return await interaction.followUp({ embeds: [noPermissionsEmbed] }).catch(() => {});
+            }
+        }
         } else if (subcommand === 'fields') {
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-                return await interaction.reply({ content: Emojis.error + ' You do not have permission to use this command.', ephemeral: true });
+                const noPermissionsEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' You do not have permission to use this command.')
+                    .setColor(Colors.error);
+                return await interaction.followUp({ embeds: [noPermissionsEmbed], ephemeral: true });
             }
             var randomColor = Math.floor(Math.random()*16777215).toString(16);
             const panelName = interaction.options.getString('panel-name');
@@ -725,7 +735,10 @@ module.exports = {
             // find panel
             const panel = await selfroles.findOne({ guildID: guild });
             if (!panel) {
-                return await interaction.reply({ content: Emojis.error + ` There are no panels in your guild.`, ephemeral: true });
+                const noPanelsEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' There are no panels in your guild.')
+                    .setColor(Colors.error);
+                return await interaction.followUp({ embeds: [noPanelsEmbed], ephemeral: true });
             }
             let targetPanel;
             for(let i = 0; i< panel.panels.length; i++) {
@@ -735,7 +748,10 @@ module.exports = {
                 }
             }
             if(!targetPanel) {
-                return await interaction.reply({ content: Emojis.error + ` The panel \`${panelName}\` does not exist.`, ephemeral: true });
+                const noPanelEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ` The panel \`${panelName}\` does not exist.`)
+                    .setColor(Colors.error);
+                return await interaction.followUp({ embeds: [noPanelEmbed], ephemeral: true });
             }
             // add field with update one
             await selfroles.updateOne({
@@ -754,11 +770,18 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setDescription(Emojis.success + ` Added the field \`${fieldName}\` to the panel \`${panelName}\`.`)
                 .setColor(Colors.success);
-            await interaction.reply({ embeds: [embed], ephemeral: true });
+            await interaction.reply({ embeds: [embed] });
         } else if (subcommand === 'rainbow-role') {
             let guild = interaction.guild.id;
             let role = interaction.options.getRole('role');
             let delay = interaction.options.getInteger('delay');
+
+            if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
+                const noPermsEmbed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' I do not have permission to manage roles.')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [noPermsEmbed], ephemeral: true });
+            }
 
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
                 const noPermsEmbed = new EmbedBuilder()
@@ -803,7 +826,7 @@ module.exports = {
             const successEmbed = new EmbedBuilder()
                 .setDescription(Emojis.success + ` Added the role \`${role.name}\` to the rainbow roles.`)
                 .setColor(Colors.success);
-            await interaction.reply({ embeds: [successEmbed], ephemeral: true });
+            await interaction.reply({ embeds: [successEmbed] });
             rainbowRole(role, delay);
         }
     }
