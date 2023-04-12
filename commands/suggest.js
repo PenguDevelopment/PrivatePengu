@@ -12,8 +12,8 @@ module.exports = {
         .setDescription('Suggest something!')
         .addStringOption(option => option.setName('suggestion').setDescription('The suggestion to send.').setRequired(true)),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
 
         const suggestion = interaction.options.getString('suggestion');
         const guilds = await guild.findOne({ guildID: interaction.guild.id });

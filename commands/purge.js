@@ -9,9 +9,9 @@ module.exports = {
         .setDescription('Purges a specified amount of messages. (Old messages are fine.)')
         .addIntegerOption(option => option.setName('amount').setDescription('The amount of messages to purge.').setRequired(true)),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
             const embed = new EmbedBuilder()
                 .setDescription(Emojis.error + ' I do not have permission to use this command.')
                 .setColor(Colors.error)

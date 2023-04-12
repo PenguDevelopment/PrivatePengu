@@ -142,10 +142,10 @@ module.exports = {
             .addBooleanOption(option => option.setName('mention').setDescription('Do you want a mention on the outside of the embed?').setRequired(true))
         ),
     async execute(interaction) {
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.SendMessages)) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) {
             return;
         }
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.EmbedLinks)) {
+        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) {
             return await interaction.reply({ content: Emojis.error + ' I do not have permission to send embeds.', ephemeral: true });
         }
 

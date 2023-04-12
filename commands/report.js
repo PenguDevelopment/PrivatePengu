@@ -10,8 +10,8 @@ module.exports = {
         .addUserOption(option => option.setName('user').setDescription('The user to report.').setRequired(true))
         .addStringOption(option => option.setName('reason').setDescription('The reason for the report.').setRequired(true)),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
         // check if report channel exists
         const guild = await guilds.findOne({
             guildID: interaction.guild.id

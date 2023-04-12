@@ -6,8 +6,8 @@ module.exports = {
         .setDescription('Get help with the bot.'),
     async execute(interaction) {
 
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
 
         var randomColor = Math.floor(Math.random()*16777215).toString(16);
         const helpEmbed = new EmbedBuilder()

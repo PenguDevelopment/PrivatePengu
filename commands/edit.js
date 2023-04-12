@@ -13,11 +13,11 @@ module.exports = {
                 .addStringOption(option => option.setName('panel-name').setDescription('The name of the panel.').setRequired(true))
 ),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) {
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)) {
             return;
         }
 
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
         
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             const embed = new EmbedBuilder()

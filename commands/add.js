@@ -85,10 +85,10 @@ module.exports = {
                 ))
         ),
         async execute(interaction) {
-            if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) {
+            if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)) {
                 return;
             }
-            if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+            if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
             
             const subcommand = interaction.options.getSubcommand();
             if (subcommand === 'role') {
@@ -776,7 +776,7 @@ module.exports = {
             let role = interaction.options.getRole('role');
             let delay = interaction.options.getInteger('delay');
 
-            if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
+            if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
                 const noPermsEmbed = new EmbedBuilder()
                     .setDescription(Emojis.error + ' I do not have permission to manage roles.')
                     .setColor(Colors.error);

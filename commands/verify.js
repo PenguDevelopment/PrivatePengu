@@ -12,11 +12,11 @@ module.exports = {
         .addChannelOption(option => option.setName('channel').setDescription('The channel to send the button menu in.').setRequired(true))
         .addRoleOption(option => option.setName('role').setDescription('The role to give to people who click the button.').setRequired(true)),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.ManageRoles)) return interaction.reply('I need the `Manage Roles` permission to run this command.');
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.ManageMessages)) return interaction.reply('I need the `Manage Messages` permission to run this command.');
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.AddReactions)) return interaction.reply('I need the `Add Reactions` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageRoles)) return interaction.reply('I need the `Manage Roles` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageMessages)) return interaction.reply('I need the `Manage Messages` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.AddReactions)) return interaction.reply('I need the `Add Reactions` permission to run this command.');
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             const embed = new EmbedBuilder()

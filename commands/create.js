@@ -76,10 +76,10 @@ module.exports = {
         .addIntegerOption(option => option.setName('limit').setDescription('The number of links a person can get per month.').setRequired(false))
     ),
     async execute(interaction) {
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.flags.SendMessages)) {
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.flags.SendMessages)) {
             return;
         }
-        if (!interaction.guild.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
+        if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
         
       const subcommand = interaction.options.getSubcommand();
       if (subcommand === 'achievement') {
