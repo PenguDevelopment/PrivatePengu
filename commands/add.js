@@ -4,7 +4,7 @@ const { Emojis, Colors } = require('../statics.js');
 const linksSchema = require('../links-schema.js');
 const achivment = require('../achivment-schema.js');
 const rainbowSchema = require('../rainbow-schema.js');
-
+// 
 async function rainbowRole(role, delay) {
     const rainbow = new Array(12);
 
