@@ -32,10 +32,10 @@ async function rainbowRole(role, delay) {
     const currentIndex = rainbow.indexOf(currentColor);
 
     if (currentIndex === -1) {
-        await role.setColor(rainbow[0]);
+        await role.setColor(rainbow[0]).catch(() => {});
     }
     else {
-        await role.setColor(rainbow[currentIndex + 1]);
+        await role.setColor(rainbow[currentIndex + 1]).catch(() => {});
     }
 
     setTimeout(() => {

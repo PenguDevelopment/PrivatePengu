@@ -27,7 +27,7 @@ async function changeColor(guild, result) {
 
 	for (let i = 0; i < result.rainbowRoles.length; i++) {
 		const duration = result.rainbowRoles[i].delay * 1000;
-		const role = await guild.roles.cache.get(result.rainbowRoles[i].roleID);
+		const role = await guild.roles.cache.get(result.rainbowRoles[i].roleID).catch(() => {});
 		if (!role) {
 			continue;
 		}
@@ -38,10 +38,10 @@ async function changeColor(guild, result) {
 		const currentIndex = rainbow.indexOf(currentColor);
 
 		if (currentIndex === -1) {
-			await role.setColor(rainbow[0]);
+			await role.setColor(rainbow[0]).catch(() => {});
 		}
 		else {
-			await role.setColor(rainbow[currentIndex + 1]);
+			await role.setColor(rainbow[currentIndex + 1]).catch(() => {});
 		}
 
 		setTimeout(() => {
