@@ -4,6 +4,7 @@ const { ButtonBuilder } = require('discord.js');
 const { ActionRowBuilder } = require('discord.js');
 var randomColor = Math.floor(Math.random()*16777215).toString(16);
 const verify = require('../verify-schema');
+const { Emojis, Colors, EmojisIds } = require("../statics.js")
 
 module.exports = {
     data: new SlashCommandBuilder()
