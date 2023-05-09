@@ -314,7 +314,7 @@ module.exports = {
                 channelID: channel.id
             }).save();
         } else if (subcommand === 'welcome') {
-            if (!interaction.member.permissions.has(PermissionsBitField.FLAGS.ADMINISTRATOR)) {
+            if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
                 const embed = new EmbedBuilder()
                     .setDescription(Emojis.error + ' You do not have permission to use this command.')
                     .setColor(Colors.error)
