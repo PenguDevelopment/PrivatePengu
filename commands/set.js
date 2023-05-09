@@ -326,7 +326,7 @@ module.exports = {
     
             const message = await interaction.options.getString('message');
             const mention = await interaction.options.getBoolean('mention');
-            let color = await colorSorter(await interaction.options.getString('color'))
+            let color = await interaction.options.getString('color')
 
             await Welcome.findOneAndUpdate({
                 guildID: interaction.guild.id
