@@ -47,17 +47,18 @@ module.exports = {
             await oldMessages.forEach(async message => {
                 await message.delete();
                 if (message.id === oldMessages.last().id) {
-                    await interaction.channel.messages.fetch(oldMessages.last().id).catch(() => { });
-                    let totalSize = await oldMessages.size + await messages.size;
-                    const successEmbed = new EmbedBuilder()
-                        .setDescription(Emojis.success + ` Successfully purged ${await totalSize} messages.`)
-                        .setColor(Colors.success)
-                    await interaction.editReply({ embeds: [successEmbed], ephemeral: true });
-                }
+                    await interaction.channel.messages.fetch(oldMessages.last().id).catch(() => { });                }
             });
 
             messages = await messages.filter(message => !oldMessages.has(message.id));
         }
+        
+        let totalSize = await oldMessages.size + await messages.size;
+
+        const successEmbed = new EmbedBuilder()
+            .setDescription(Emojis.success + ` Successfully purged ${await totalSize} messages.`)
+            .setColor(Colors.success)
+        await interaction.editReply({ embeds: [successEmbed], ephemeral: true });
 
         await interaction.channel.bulkDelete(messages);
     }
