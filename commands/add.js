@@ -1,9 +1,9 @@
 const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
-const selfroles = require( '../selfroles-schema.js');
+const selfroles = require( '../modals/selfroles-schema.js');
 const { Emojis, Colors } = require('../statics.js');
-const linksSchema = require('../links-schema.js');
-const achivment = require('../achivment-schema.js');
-const rainbowSchema = require('../rainbow-schema.js');
+const linksSchema = require('../modals/links-schema.js');
+const achivment = require('../modals/achivment-schema.js');
+const rainbowSchema = require('../modals/rainbow-schema.js');
 // 
 async function rainbowRole(role, delay) {
     const rainbow = new Array(12);

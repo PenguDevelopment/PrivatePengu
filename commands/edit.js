@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
-const selfroles = require('../selfroles-schema.js');
+const selfroles = require('../modals/selfroles-schema.js');
 const { Emojis, Colors } = require('../statics.js');
 
 module.exports = {

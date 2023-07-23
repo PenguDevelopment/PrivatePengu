@@ -4,7 +4,7 @@ const path = require('node:path');
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 require('dotenv').config();
 const { Collection, ActivityType } = require('discord.js')
-const selfroles = require('./selfroles-schema.js');
+const selfroles = require('./modals/selfroles-schema.js');
 const chalk = require("chalk");
 const mongoose = require('mongoose');
 const token = process.env.TOKEN;

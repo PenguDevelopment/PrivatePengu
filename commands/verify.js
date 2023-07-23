@@ -1,17 +1,34 @@
-const { SlashCommandBuilder, PermissionsBitField } = require('discord.js');
+const { SlashCommandBuilder, PermissionsBitField, ButtonStyle, ChannelType } = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
 const { ButtonBuilder } = require('discord.js');
 const { ActionRowBuilder } = require('discord.js');
 var randomColor = Math.floor(Math.random()*16777215).toString(16);
-const verify = require('../verify-schema');
+const verify = require('../modals/verify-schema');
 const { Emojis, Colors, EmojisIds } = require("../statics.js")
+// const Captcha = require("@haileybot/captcha-generator");
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('verify')
-        .setDescription('Set up a button menu to verify people when they join your server!')
-        .addChannelOption(option => option.setName('channel').setDescription('The channel to send the button menu in.').setRequired(true))
-        .addRoleOption(option => option.setName('role').setDescription('The role to give to people who click the button.').setRequired(true)),
+        .setDescription('Set up a verification system for your server.')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("channel-captcha")
+                .setDescription("A captcha menu will be sent to a channel of your choice.")
+                .addChannelOption(option => option.setName('channel').setDescription('The channel to send the captcha menu to.').setRequired(true).addChannelTypes(ChannelType.GuildText))
+                .addStringOption(option => option.setName('role').setDescription('The role to give to users who verify.').setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("dm-captcha")
+                .setDescription("A captcha menu will be sent to the user's DMs.")
+                .addChannelOption(option => option.setName('channel').setDescription('The channel to send the captcha menu to.').setRequired(true).addChannelTypes(ChannelType.GuildText))
+                .addStringOption(option => option.setName('role').setDescription('The role to give to users who verify.').setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("instant-verify")
+                .setDescription("Users will be instantly verified when they click the verify button.")
+                .addChannelOption(option => option.setName('channel').setDescription('The channel to send the captcha menu to.').setRequired(true).addChannelTypes(ChannelType.GuildText))
+                .addStringOption(option => option.setName('role').setDescription('The role to give to users who verify.').setRequired(true))),
     async execute(interaction) {
         if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;
         if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.EmbedLinks)) return interaction.reply('I need the `Embed Links` permission to run this command.');
@@ -25,12 +42,8 @@ module.exports = {
                 .setColor(Colors.error);
             return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
-        const channel = interaction.options.getChannel('channel');
-        const role = interaction.options.getRole('role');
-        const guild = interaction.guild;
-        const guildId = guild.id;
-        const channelId = channel.id;
-        const roleId = role.id;
+        
+        let subcommand = interaction.options.getSubcommand();
         function genId(length) {
             let result = '';
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -42,31 +55,82 @@ module.exports = {
             return result;
         }
         var specificId = genId(8);
-        const embed = new EmbedBuilder()
-            .setDescription(Emojis.success + ` Successfully set up a button menu to verify people in ${channel}.`)
-            .setColor(Colors.success)
-        const row = new ActionRowBuilder()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId(`verify-${specificId}-${guildId}-${channelId}-${roleId}`)
-                    .setLabel('Verify')
-                    .setStyle(3)
-            )
-        const embed2 = new EmbedBuilder()
-            .setTitle('Verify')
-            .setDescription('Click the button below to verify yourself.')
-            .setColor(randomColor)
-        
-        await interaction.reply({ embeds: [embed], ephemeral: true });
-        await channel.send({ embeds: [embed2], components: [row] });
-        
-        const messageId = channel.lastMessageId;
-        await new verify({
-            specificId: `${specificId}`,
-            guildId: guildId,
-            channelId: channelId,
-            roleId: roleId,
-            messageId: messageId
-        }).save();
+
+        if (subcommand == 'channel-captcha') {
+          let channel = interaction.options.getChannel('channel');
+          if (channel.type != 0) return interaction.reply('The channel you provided is not a text channel.');
+          
+          const alreadyVerify = await verify.findOne({
+            guildId: interaction.guild.id,
+            channelId: channel.id,
+          });
+
+          if (alreadyVerify) {
+            // first check if message exists
+            try {
+              const message = await channel.messages.fetch(alreadyVerify.messageId);
+              if (!message) {
+                await verify.findOneAndDelete({
+                  guildId: interaction.guild.id,
+                  channelId: channel.id,
+                });
+              } else {
+                const embed = new EmbedBuilder()
+                    .setDescription(Emojis.error + ' There is already a verification system in that channel.')
+                    .setColor(Colors.error);
+                return await interaction.reply({ embeds: [embed], ephemeral: true });
+              }
+            } catch (err) {
+              await verify.findOneAndDelete({
+                guildId: interaction.guild.id,
+                channelId: channel.id,
+              });
+            }
+          };
+
+          let roleUnparsed = interaction.options.getString('role');
+          let role = roleUnparsed.replace(/\D/g, '');
+          let guildName = interaction.guild.name;
+
+          const embed = new EmbedBuilder()
+              .setTitle('Verification')
+              .addFields(
+                { name: `${Emojis.space}${Emojis.error} To access \`${guildName}\`, you need to complete verification first. `, value: `${Emojis.space}${Emojis.space}${Emojis.click} Click on the button below to start.`, inline: false },
+              )
+              .setColor(Colors.normal)
+          const row = new ActionRowBuilder()
+              .addComponents(
+                  new ButtonBuilder()
+                      .setCustomId(`verify-${specificId}`)
+                      .setLabel('Verify')
+                      .setStyle(ButtonStyle.Success)
+              )
+          const responseEmbed = new EmbedBuilder()
+              .setTitle('Success!')
+              .setDescription(`You have successfully created a verification system in ${channel}.`)
+              .setColor(Colors.success)
+              .setTimestamp()
+          await interaction.reply({
+              embeds: [responseEmbed],
+              ephemeral: true
+          });
+          const message = await channel.send({
+              embeds: [embed],
+              components: [row]
+          });
+
+          const newVerify = new verify({
+            guildId: interaction.guild.id,
+            channelId: channel.id,
+            roleId: role,
+            type: 'channel-captcha',
+            specificId: specificId,
+            messageId: message.id
+          })
+          newVerify.save()
+        } else {
+          await interaction.reply('This command is still in development.')
+        }
+                
     }
 }

@@ -1,6 +1,6 @@
 const { Events } = require('discord.js');
 const chalk = require("chalk");
-const rainbowSchema = require('../rainbow-schema.js');
+const rainbowSchema = require('../modals/rainbow-schema.js');
 
 const rainbow = new Array(12);
 

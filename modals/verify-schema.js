@@ -18,6 +18,14 @@ const schema = new mongoose.Schema({
     specificId: {
         type: String,
         required: true
+    },
+    type: {
+        type: String,
+        required: true
+    },
+    channelId: {
+        type: String,
+        required: true
     }
 });
 

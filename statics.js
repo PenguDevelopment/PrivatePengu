@@ -8,6 +8,11 @@ const Emojis = {
     clock: '<:icons_clock:1091035673882009651>',
     link: '<:icons_link:1091035634522652692>',
     loading: '<a:loading_bg:1091124470615392256>',
+    space: '<:space:1132447377656135742>',
+    click: '<:click:1132448695120568340>',
+    case: '<:case:1132462063873167430>',
+    rename: '<:abcrename:1132464983616274453>',
+    no_decoy: '<:no_decoy:1132466061640466483>',
 }
 
 const Colors = {

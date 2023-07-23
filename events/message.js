@@ -1,6 +1,6 @@
 const { EmbedBuilder, Events } = require('discord.js');
-const AchivmentModel = require('../achivment-schema.js');
-const PersonalAchivmentModel = require('../personal-achivment-schema.js');
+const AchivmentModel = require('../modals/achivment-schema.js');
+const PersonalAchivmentModel = require('../modals/personal-achivment-schema.js');
 
 module.exports = {
   name: Events.MessageCreate,

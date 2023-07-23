@@ -1,5 +1,5 @@
-const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const linkSchema = require( '../links-schema.js');
+const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require('discord.js');
+const linkSchema = require( '../modals/links-schema.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,12 +9,12 @@ module.exports = {
             .setName('link')
             .setDescription('Send your finished link dispenser to a channel.')
             .addStringOption(option => option.setName('link-name').setDescription('The name of the link dispenser.').setRequired(true))
-            .addChannelOption(option => option.setName('channel').setDescription('The channel to send the link dispenser to.').setRequired(true))
+            .addChannelOption(option => option.setName('channel').setDescription('The channel to send the link dispenser to.').setRequired(true).addChannelTypes(ChannelType.GuildText))
         ).addSubcommand(subcommand => subcommand
             .setName('panel')
             .setDescription('Send your finished panel to a channel. (make sure you have already added your roles with /add-roles)')
             .addStringOption(option => option.setName('panel-name').setDescription('The name of the panel.').setRequired(true))
-            .addChannelOption(option => option.setName('channel').setDescription('The channel to send the panel to.').setRequired(true))
+            .addChannelOption(option => option.setName('channel').setDescription('The channel to send the panel to.').setRequired(true).addChannelTypes(ChannelType.GuildText))
         ),
     async execute(interaction) {
         if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)) return;

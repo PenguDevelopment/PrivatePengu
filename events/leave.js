@@ -1,7 +1,7 @@
 const discord = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
-const Leave = require('../leave-schema.js');
-const selfroles = require('../selfroles-schema.js');
+const Leave = require('../modals/leave-schema.js');
+const selfroles = require('../modals/selfroles-schema.js');
 
 module.exports = {
     name: discord.Events.GuildMemberRemove,

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
-const guild = require('../guild-schema.js');
-const suggest = require('../suggestions-schema.js');
+const guild = require('../modals/guild-schema.js');
+const suggest = require('../modals/suggestions-schema.js');
 const { EmbedBuilder } = require('discord.js');
 const { Emojis, Colors, EmojisIds } = require("../statics.js")
 const { ActionRowBuilder, ButtonBuilder } = require('discord.js');

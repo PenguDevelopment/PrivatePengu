@@ -1,8 +1,8 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, Emoji } = require('discord.js');
-const alertSchema = require('../alert-schema.js');
-const guild = require('../guild-schema.js');
-const Leave = require('../leave-schema.js');
-const Welcome = require('../welcome-schema.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, Emoji, ChannelType } = require('discord.js');
+const alertSchema = require('../modals/alert-schema.js');
+const guild = require('../modals/guild-schema.js');
+const Leave = require('../modals/leave-schema.js');
+const Welcome = require('../modals/welcome-schema.js');
 const { Emojis, Colors } = require('../statics.js');
 
 module.exports = {
@@ -24,7 +24,8 @@ module.exports = {
                         .addChannelOption(option =>
                             option.setName('channel')
                                 .setDescription('The channel to send the alert in.')
-                                .setRequired(true))
+                                .setRequired(true)
+                                .addChannelTypes(ChannelType.GuildText))
                         .addStringOption(option =>
                             option.setName('title')
                                 .setDescription('The title of the alert.')
@@ -68,7 +69,7 @@ module.exports = {
             subcommand
             .setName('report')
             .setDescription('Set the report channel.')
-            .addChannelOption(option => option.setName('channel').setDescription('The channel to set as the report channel.').setRequired(true)),
+            .addChannelOption(option => option.setName('channel').setDescription('The channel to set as the report channel.').setRequired(true).addChannelTypes(ChannelType.GuildText)),
         ).addSubcommand(subcommand =>
             subcommand
             .setName('leave')
@@ -103,12 +104,12 @@ module.exports = {
             subcommand
             .setName('review')
             .setDescription('Sets the review channel.')
-            .addChannelOption(option => option.setName('channel').setDescription('The channel to set as the review channel.').setRequired(true)),
+            .addChannelOption(option => option.setName('channel').setDescription('The channel to set as the review channel.').setRequired(true).addChannelTypes(ChannelType.GuildText)),
         ).addSubcommand(subcommand =>
             subcommand
             .setName('suggest')
             .setDescription('Sets the suggestion channel.')
-            .addChannelOption(option => option.setName('channel').setDescription('The channel to set as the suggestion channel.').setRequired(false))
+            .addChannelOption(option => option.setName('channel').setDescription('The channel to set as the suggestion channel.').setRequired(false).addChannelTypes(ChannelType.GuildText))
         ).addSubcommand(subcommand =>
             subcommand
             .setName('welcome')

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const guilds = require('../guild-schema.js');
+const guilds = require('../modals/guild-schema.js');
 const { EmbedBuilder } = require('discord.js');
 var randomColor = Math.floor(Math.random()*16777215).toString(16);
 

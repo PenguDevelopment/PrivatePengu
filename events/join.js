@@ -1,6 +1,6 @@
 const discord = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
-const Welcome = require('../welcome-schema.js');
+const Welcome = require('../modals/welcome-schema.js');
 module.exports = {
     name: discord.Events.GuildMemberAdd,
     async execute(member) {
