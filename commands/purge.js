@@ -45,7 +45,7 @@ module.exports = {
 
         if (oldMessages.size > 0) {
             await oldMessages.forEach(async message => {
-                await message.delete();
+                await message.delete().catch(() => { });
                 if (message.id === oldMessages.last().id) {
                     await interaction.channel.messages.fetch(oldMessages.last().id).catch(() => { });                }
             });

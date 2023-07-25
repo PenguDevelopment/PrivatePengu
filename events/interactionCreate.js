@@ -15,67 +15,74 @@ const verifySchema = require('../modals/verify-schema.js');
 
 const fontPath = path.join(__dirname, '../fonts/arial/arial.ttf');
 registerFont(fontPath, { family: 'Arial' });
+const Captcha = require("@haileybot/captcha-generator");
 
-async function generateCaptcha() {
-    const canvas = createCanvas(200, 80);
-    const ctx = canvas.getContext('2d');
-  
-    // Transparent background
-    ctx.fillStyle = 'rgba(255, 255, 255, 0)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-    // Generate random string (letters and numbers) for the captcha
-    const captchaText = randomstring.generate({
-      length: 6, // Change the length of the captcha string as per your requirement
-      charset: 'alphanumeric', // Include letters and numbers for the captcha
-    });
-  
-    // Randomly place gray dummy letters on the canvas, ensuring they don't overlap with the answer characters
-    ctx.fillStyle = 'gray';
-    const dummyCharset = 'alphanumeric'.replace(/[A-Za-z0-9]/g, ''); // Get all the characters not present in the answer charset
-    const dummyCharsCount = Math.min(10, captchaText.length); // Limit the number of dummy characters to 10 or less
-  
-    ctx.font = '30px Arial';
-  
-    // Draw gray dummy characters in the bottom layer
-    for (let i = 0; i < dummyCharsCount; i++) {
-      const dummyChar = randomstring.generate({ length: 1, charset: dummyCharset });
-      let x, y;
-  
-      // Keep generating random positions until they don't overlap with the green answer characters
-      do {
-        x = Math.random() * 200;
-        y = Math.random() * 80;
-      } while (isCloseToGreenChars(x, y, captchaText, ctx));
-  
-      ctx.fillText(dummyChar, x, y);
-    }
-  
-    // Draw green answer characters on top
-    ctx.fillStyle = 'lightgreen'; // Use lightgreen for the answer characters
-    const xStart = 20;
-    const xStep = 160 / captchaText.length; // To make the answer linear, we divide the width evenly
-    for (let i = 0; i < captchaText.length; i++) {
-      const x = xStart + xStep * i;
-      const y = Math.random() * 40 + 40;
-      ctx.fillText(captchaText.charAt(i), x, y);
-    }
-  
-    // Draw the green line through the letters
-    ctx.beginPath();
-    ctx.moveTo(xStart, Math.random() * 20 + 40);
-    for (let i = 0; i < captchaText.length; i++) {
-      const x = xStart + xStep * i;
-      const y = Math.random() * 20 + 40;
-      ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = 'lightgreen';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  
-    // Convert the canvas to a buffer
-    const captchaBuffer = canvas.toBuffer();
-    return { captchaBuffer, answer: captchaText };
+async function generateCaptcha(type = 'pengu') {
+	if (type === 'pengu') {
+		const canvas = createCanvas(200, 80);
+		const ctx = canvas.getContext('2d');
+	
+		// Transparent background
+		ctx.fillStyle = 'rgba(255, 255, 255, 0)';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+	
+		// Generate random string (letters and numbers) for the captcha
+		const captchaText = randomstring.generate({
+		length: 6, // Change the length of the captcha string as per your requirement
+		charset: 'alphanumeric', // Include letters and numbers for the captcha
+		});
+	
+		// Randomly place gray dummy letters on the canvas, ensuring they don't overlap with the answer characters
+		ctx.fillStyle = 'gray';
+		const dummyCharset = 'alphanumeric'.replace(/[A-Za-z0-9]/g, ''); // Get all the characters not present in the answer charset
+		const dummyCharsCount = Math.min(10, captchaText.length); // Limit the number of dummy characters to 10 or less
+	
+		ctx.font = '30px Arial';
+	
+		// Draw gray dummy characters in the bottom layer
+		for (let i = 0; i < dummyCharsCount; i++) {
+		const dummyChar = randomstring.generate({ length: 1, charset: dummyCharset });
+		let x, y;
+	
+		// Keep generating random positions until they don't overlap with the green answer characters
+		do {
+			x = Math.random() * 200;
+			y = Math.random() * 80;
+		} while (isCloseToGreenChars(x, y, captchaText, ctx));
+	
+		ctx.fillText(dummyChar, x, y);
+		}
+	
+		// Draw green answer characters on top
+		ctx.fillStyle = 'lightgreen'; // Use lightgreen for the answer characters
+		const xStart = 20;
+		const xStep = 160 / captchaText.length; // To make the answer linear, we divide the width evenly
+		for (let i = 0; i < captchaText.length; i++) {
+		const x = xStart + xStep * i;
+		const y = Math.random() * 40 + 40;
+		ctx.fillText(captchaText.charAt(i), x, y);
+		}
+	
+		// Draw the green line through the letters
+		ctx.beginPath();
+		ctx.moveTo(xStart, Math.random() * 20 + 40);
+		for (let i = 0; i < captchaText.length; i++) {
+		const x = xStart + xStep * i;
+		const y = Math.random() * 20 + 40;
+		ctx.lineTo(x, y);
+		}
+		ctx.strokeStyle = 'lightgreen';
+		ctx.lineWidth = 2;
+		ctx.stroke();
+	
+		// Convert the canvas to a buffer
+		const captchaBuffer = canvas.toBuffer();
+		return { captchaBuffer, answer: captchaText };
+	} else if (type === 'hailey') {
+		const captcha = new Captcha();
+		const captchaBuffer = await captcha.PNGStream;
+		return { captchaBuffer, answer: captcha.value };
+	}
   }
   
   // Helper function to check if a point is within a distance of the green characters
@@ -358,7 +365,7 @@ module.exports = {
 					.setColor(Colors.error)
 				return interaction.reply({ embeds: [embed], ephemeral: true });
 			}
-			if (member.roles.cache.has(verify.role)) {
+			if (member.roles.cache.has(verify.roleId)) {
 				const embed = new EmbedBuilder()
 					.setDescription(Emojis.error + ' You are already verified.')
 					.setColor(Colors.error)
@@ -379,12 +386,34 @@ module.exports = {
 				return interaction.reply({ embeds: [embed], ephemeral: true });
 			}
 			
-			const captchaBuffer = await generateCaptcha();
+			if (verify.captchaType === 'instant') {
+				await member.roles.add(role).catch(async (error) => {
+					const embed = new EmbedBuilder()
+						.setDescription(Emojis.error + ' I do not have permission to add that role. Please contact a server administrator.')
+						.setColor(Colors.error)
+					return await interaction.reply({ embeds: [embed], ephemeral: true });
+				}
+				);
+				const embed = new EmbedBuilder()
+					.setDescription(Emojis.success + ' You have been verified.')
+					.setColor(Colors.success)
+				return await interaction.reply({ embeds: [embed], ephemeral: true });
+			}
+
+			const captchaBuffer = await generateCaptcha(verify.captchaType);
+
+			let text;
+			if (verify.captchaType === 'pengu') {
+				text = `${Emojis.rename} Type out the green colored characters from left to right. \n \n ${Emojis.no_decoy} Ignore the decoy characters, including the fake line. \n \n ${Emojis.case} You don\'t have to respect character cases.`;
+			} else if (verify.captchaType === 'hailey') {
+				text = `${Emojis.rename} Type out the characters from left to right. \n \n ${Emojis.case} You don\'t have to respect character cases.`;
+			}
+
 			const embed = new EmbedBuilder()
 				.setTitle('Are you a human?')
 				.setDescription('Please complete the captcha below to verify.')
 				.addFields(
-					{ name: 'Notes:', value: `${Emojis.rename} Type out the green colored characters from left to right. \n \n ${Emojis.no_decoy} Ignore the decoy characters, including the fake line. \n \n ${Emojis.case} You don\'t have to respect character cases.` }
+					{ name: 'Tips:', value: text, inline: false }
 				)
 				.setImage('attachment://captcha.png')
 				.setColor(Colors.normal)
@@ -396,9 +425,9 @@ module.exports = {
 						.setLabel('Answer')
 						.setStyle(ButtonStyle.Success)
 				)
-			
+			let captcha;
 			try {
-				await interaction.reply({ embeds: [embed], files: [{ attachment: captchaBuffer.captchaBuffer, name: 'captcha.png' }], components: [row], ephemeral: true });
+				captcha = await interaction.reply({ embeds: [embed], files: [{ attachment: captchaBuffer.captchaBuffer, name: 'captcha.png' }], components: [row], ephemeral: true });
 			}
 			catch {
 				const embed = new EmbedBuilder()
@@ -413,7 +442,7 @@ module.exports = {
 			function generateModalCustomId(id, date) {
 				return `${id}-${date}`;
 			}
-			  
+			let alreadyReplied = false;
 			collector.on('collect', async i => {
 				if (i.customId === `captcha-${id}-${date}`) {
 					const modalCustomId = generateModalCustomId(id, date);
@@ -431,7 +460,6 @@ module.exports = {
 					modal.addComponents(row);
 
 					await i.showModal(modal);
-
 					const submitted = await i.awaitModalSubmit({
 						time: 120000,
 						filter: (interaction) => interaction.user.id === i.user.id,
@@ -440,13 +468,13 @@ module.exports = {
 						return null;
 					});
 
-					if (submitted) {
+					if (submitted && !alreadyReplied) {
+						alreadyReplied = true;
 						const answer = submitted.fields.getTextInputValue(`answerInput-${modalCustomId}`);
 						if (answer.toLowerCase() === captchaBuffer.answer.toLowerCase()) {
-							await submitted.deferUpdate();
+							await submitted.deferUpdate().catch(() => {});
 							let perms = true;
 							await member.roles.add(role).catch(async (error) => {
-								console.log(error);
 								const embed = new EmbedBuilder()
 									.setDescription(Emojis.error + ' I do not have permission to add that role. Please contact a server administrator.')
 									.setColor(Colors.error)
@@ -454,11 +482,11 @@ module.exports = {
 								return await i.followUp({ embeds: [embed], ephemeral: true });
 							});
 							if (!perms) return;
-							await interaction.editReply({ content: 'Verification Finished.', components: [], embeds: [], ephemeral: true, files: [] });
+							await captcha.delete().catch(() => {});
 							const followUp = new EmbedBuilder()
 								.setDescription(Emojis.success + ' You have been verified.')
 								.setColor(Colors.success)
-							await i.followUp({ embeds: [followUp], ephemeral: true });
+							await interaction.followUp({ embeds: [followUp], ephemeral: true });
 							await collector.stop();
 						} else {
 							await submitted.deferUpdate();
@@ -466,6 +494,7 @@ module.exports = {
 								.setDescription(Emojis.error + ' That is not the correct answer. Please try again.')
 								.setColor(Colors.error)
 							await i.followUp({ embeds: [followUp], ephemeral: true });
+							alreadyReplied = false;
 						}
 					}
 				}
@@ -479,8 +508,97 @@ module.exports = {
 				}
 			}
 			);
+		} else if (verify.type === 'dm-captcha') {
+			const guild = interaction.guild;
+			const member = guild.members.cache.get(interaction.user.id);
+			const role = guild.roles.cache.get(`${verify.roleId}`);
+
+			if (!role) {
+				const embed = new EmbedBuilder()
+					.setDescription(Emojis.error + ' This role does not exist.')
+					.setColor(Colors.error)
+				return interaction.reply({ embeds: [embed], ephemeral: true });
+			}
+			if (member.roles.cache.has(verify.roleId)) {
+				const embed = new EmbedBuilder()
+					.setDescription(Emojis.error + ' You are already verified.')
+					.setColor(Colors.error)
+				return interaction.reply({ embeds: [embed], ephemeral: true });
+			}
+
+			const captchaBuffer = await generateCaptcha(verify.captchaType);
+
+			let text;
+			if (verify.captchaType === 'pengu') {
+				text = `${Emojis.rename} Type out the green colored characters from left to right. \n \n ${Emojis.no_decoy} Ignore the decoy characters, including the fake line. \n \n ${Emojis.case} You don\'t have to respect character cases.`;
+			} else if (verify.captchaType === 'hailey') {
+				text = `${Emojis.rename} Type out the characters from left to right. \n \n ${Emojis.case} You don\'t have to respect character cases.`;
+			}
+
+			const embed = new EmbedBuilder()
+				.setTitle('Are you a human?')
+				.setDescription('Please complete the captcha below to verify.')
+				.addFields(
+					{ name: 'Tips:', value: text, inline: false }
+				)
+				.setImage('attachment://captcha.png')
+				.setColor(Colors.normal)
+				.setFooter({ text: `Verification Time: 2 minutes.`})
+			let captcha;
+			try {
+				captcha = await interaction.user.send({ embeds: [embed], files: [{ attachment: captchaBuffer.captchaBuffer, name: 'captcha.png' }]});
+				const dmUrl = `https://discord.com/channels/@me/${captcha.channel.id}`;
+				const successEmbed = new EmbedBuilder()
+					.setDescription(Emojis.success + ` I have sent you a captcha in [your DMs](${dmUrl}).`)
+					.setColor(Colors.success)
+				await interaction.reply({ embeds: [successEmbed], ephemeral: true });
+			}
+			catch (error) {
+				console.log(error);
+				const embed = new EmbedBuilder()
+					.setDescription(Emojis.error + ' I was unable to send you a captcha.')
+					.setColor(Colors.error)
+				return interaction.reply({ embeds: [embed], ephemeral: true });
+			}
+
+			const filter = m => m.author.id === interaction.user.id;
+
+			const collector = await captcha.channel.createMessageCollector({ filter, time: 2 * 60 * 1000 });
+			
+			collector.on('collect', async (message) => {
+				if (message.content.toLowerCase() === captchaBuffer.answer.toLowerCase()) {
+					let perms = true;
+					await member.roles.add(role).catch(async (error) => {
+						const embed = new EmbedBuilder()
+							.setDescription(Emojis.error + ' I do not have permission to add that role. Please contact a server administrator.')
+							.setColor(Colors.error)
+						perms = false;
+						return await message.channel.send({ embeds: [embed], ephemeral: true });
+					});
+					if (!perms) return;
+					const embed = new EmbedBuilder()
+						.setDescription(Emojis.success + ' You have been verified.')
+						.setColor(Colors.success)
+					await message.channel.send({ embeds: [embed], ephemeral: true });
+					await collector.stop();
+				} else {
+					const embed = new EmbedBuilder()
+						.setDescription(Emojis.error + ' That is not the correct answer. Please try again.')
+						.setColor(Colors.error)
+					await message.channel.send({ embeds: [embed], ephemeral: true });
+				}
+			}
+			);
+			await collector.on('end', async collected => {
+				if (collected.size === 0) {
+					const embed = new EmbedBuilder()
+						.setDescription(Emojis.error + ' You did not answer in time. Please try again.')
+						.setColor(Colors.error)
+					await captcha.channel.send({ embeds: [embed], components: [], ephemeral: true });
+				}
+			}
+			);
 		}
-		
 	} else if (interaction.isButton() && interaction.customId.startsWith("get-link")) {
 		const linkName = interaction.customId.split('-')[2];
 		const links = await linkSchema.findOne({ guildID: interaction.guild.id });

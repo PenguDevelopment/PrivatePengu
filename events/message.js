@@ -6,7 +6,7 @@ module.exports = {
   name: Events.MessageCreate,
   async execute(message) {
     if (message.author.bot) return;
-    if (message.channel.type === 'DM') return;
+    if (message.channel.type === 1) return;
     const achievements = await AchivmentModel.findOne({ guildID: message.guild.id });
     if (!achievements) return;
 

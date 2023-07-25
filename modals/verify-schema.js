@@ -26,6 +26,10 @@ const schema = new mongoose.Schema({
     channelId: {
         type: String,
         required: true
+    },
+    captchaType: {
+        type: String,
+        required: true
     }
 });
 
