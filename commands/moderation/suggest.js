@@ -1,10 +1,7 @@
-const { SlashCommandBuilder } = require('discord.js');
-const guild = require('../modals/guild-schema.js');
-const suggest = require('../modals/suggestions-schema.js');
-const { EmbedBuilder } = require('discord.js');
-const { Emojis, Colors, EmojisIds } = require("../statics.js")
-const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
-var randomColor = Math.floor(Math.random()*16777215).toString(16);
+const { SlashCommandBuilder, ActionRowBuilder, EmbedBuilder, ButtonBuilder } = require('discord.js');
+const guild = require('../../modals/guild-schema.js');
+const suggest = require('../../modals/suggestions-schema.js');
+const { Emojis, Colors, EmojisIds } = require("../../statics.js")
 
 module.exports = {
     data: new SlashCommandBuilder()

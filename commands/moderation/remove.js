@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
-const linkSchema = require( '../modals/links-schema.js');
+const linkSchema = require( '../../modals/links-schema.js');
 
 module.exports = {
     data: new SlashCommandBuilder()

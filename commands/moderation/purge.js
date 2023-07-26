@@ -1,7 +1,5 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { EmbedBuilder } = require('discord.js');
-const { Emojis, Colors } = require('../statics.js');
-const { PermissionsBitField } = require('discord.js');
+const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
+const { Emojis, Colors } = require('../../statics.js');
 
 module.exports = {
     data: new SlashCommandBuilder()

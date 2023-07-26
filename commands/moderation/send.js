@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require('discord.js');
-const linkSchema = require( '../modals/links-schema.js');
+const linkSchema = require( '../../modals/links-schema.js');
 
 module.exports = {
     data: new SlashCommandBuilder()

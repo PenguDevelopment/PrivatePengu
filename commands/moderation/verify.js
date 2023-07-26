@@ -1,10 +1,6 @@
-const { SlashCommandBuilder, PermissionsBitField, ButtonStyle, ChannelType } = require('discord.js');
-const { EmbedBuilder } = require('discord.js');
-const { ButtonBuilder } = require('discord.js');
-const { ActionRowBuilder } = require('discord.js');
-var randomColor = Math.floor(Math.random()*16777215).toString(16);
-const verify = require('../modals/verify-schema');
-const { Emojis, Colors, EmojisIds } = require("../statics.js")
+const { SlashCommandBuilder, PermissionsBitField, ButtonStyle, ChannelType, EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
+const verify = require('../../modals/verify-schema');
+const { Emojis, Colors, EmojisIds } = require("../../statics.js")
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -15,7 +11,7 @@ module.exports = {
                 .setName("channel-captcha")
                 .setDescription("A captcha menu will be sent to a channel of your choice.")
                 .addChannelOption(option => option.setName('channel').setDescription('The channel to send the captcha menu to.').setRequired(true).addChannelTypes(ChannelType.GuildText))
-                .addStringOption(option => option.setName('role').setDescription('The role to give to users who verify.').setRequired(true))
+                .addRoleOption(option => option.setName('role').setDescription('The role to give to users who verify.').setRequired(true))
                 .addStringOption(option => option.setName('type').setDescription('The type of captcha to use.').setRequired(true).addChoices(
                   { name: 'PenguCaptcha', value: 'pengu' },
                   { name: 'HaileyCaptcha', value: 'hailey' },
@@ -26,7 +22,7 @@ module.exports = {
                 .setName("dm-captcha")
                 .setDescription("A captcha menu will be sent to the user's DMs.")
                 .addChannelOption(option => option.setName('channel').setDescription('The channel to send the captcha menu to.').setRequired(true).addChannelTypes(ChannelType.GuildText))
-                .addStringOption(option => option.setName('role').setDescription('The role to give to users who verify.').setRequired(true))
+                .addRoleOption(option => option.setName('role').setDescription('The role to give to users who verify.').setRequired(true))
                 .addStringOption(option => option.setName('type').setDescription('The type of captcha to use.').setRequired(true).addChoices(
                   { name: 'PenguCaptcha', value: 'pengu' },
                   { name: 'HaileyCaptcha', value: 'hailey' },

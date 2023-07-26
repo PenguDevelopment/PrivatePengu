@@ -1,0 +1,64 @@
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const pengu = require('../../modals/pengu-schema.js');
+
+let data = new SlashCommandBuilder()
+  .setName("with")
+  .setDescription("Withdraw your money from your bank.")
+  .addStringOption((option) => option
+    .setName("amount")
+    .setDescription("Enter the amount you want to withdraw.")
+    .setRequired(true));
+
+module.exports.data = data;
+
+module.exports.execute = async function execute(interaction) {
+  var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+  let amount = interaction.options.getString("amount");
+
+  if (amount.toLowerCase() === "all") {
+    const user = await pengu.findOne({ id: interaction.user.id });
+    const bank = await user.bank;
+    amount = bank;
+  } else if (!amount.match(/^\d+$/)) {
+    const notEnough = new EmbedBuilder()
+      .setTitle("Invalid Amount!")
+      .setDescription("You have entered an invalid amount.")
+      .setColor(randomColor)
+      .setTimestamp();
+    await interaction.reply({ embeds: [notEnough] });
+    return;
+  }
+
+  if (amount < 1) {
+    const notEnough = new EmbedBuilder()
+      .setTitle("Invalid Amount!")
+      .setDescription("You have entered an amount less than 1.")
+      .setColor(randomColor)
+      .setTimestamp();
+    await interaction.reply({ embeds: [notEnough] });
+    return;
+  }
+
+  const user = await pengu.findOne({ id: interaction.user.id });
+  const bank = await user.bank;
+
+  if (amount > bank) {
+    const notEnough = new EmbedBuilder()
+      .setTitle("Not Enough Money!")
+      .setDescription("You do not have enough money to withdraw.")
+      .setColor(randomColor)
+      .setTimestamp();
+    await interaction.reply({ embeds: [notEnough] });
+  } else {
+    const embed = new EmbedBuilder()
+      .setTitle("Withdraw Successful!")
+      .setDescription(`You have successfully withdrawn <a:ice:999097979757678682> ${amount} from your bank.`)
+      .setColor(randomColor)
+      .setTimestamp();
+
+    await pengu.findOneAndUpdate({ id: interaction.user.id }, { $inc: { balance: amount } });
+    await pengu.findOneAndUpdate({ id: interaction.user.id }, { $inc: { bank: -amount } });
+    await interaction.reply({ embeds: [embed] });
+  }
+};
+module.exports.category = 'economy';

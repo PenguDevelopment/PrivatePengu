@@ -1,9 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, Emoji, ChannelType } = require('discord.js');
-const alertSchema = require('../modals/alert-schema.js');
-const guild = require('../modals/guild-schema.js');
-const Leave = require('../modals/leave-schema.js');
-const Welcome = require('../modals/welcome-schema.js');
-const { Emojis, Colors } = require('../statics.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, ChannelType } = require('discord.js');
+const alertSchema = require('../../modals/alert-schema.js');
+const guild = require('../../modals/guild-schema.js');
+const Leave = require('../../modals/leave-schema.js');
+const Welcome = require('../../modals/welcome-schema.js');
+const { Emojis, Colors } = require('../../statics.js');
 
 module.exports = {
     data: new SlashCommandBuilder()

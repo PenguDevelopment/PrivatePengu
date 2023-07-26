@@ -1,9 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
-const selfroles = require( '../modals/selfroles-schema.js');
-const achivment = require( '../modals/achivment-schema.js');
-const linkSchema = require( '../modals/links-schema.js');
-const { Emojis, Colors } = require('../statics.js');
-const rainbowSchema = require('../modals/rainbow-schema.js');
+const selfroles = require( '../../modals/selfroles-schema.js');
+const achivment = require( '../../modals/achivment-schema.js');
+const linkSchema = require( '../../modals/links-schema.js');
+const { Emojis, Colors } = require('../../statics.js');
+const rainbowSchema = require('../../modals/rainbow-schema.js');
 
 module.exports = {
     data: new SlashCommandBuilder()

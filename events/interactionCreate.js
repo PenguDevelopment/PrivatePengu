@@ -12,11 +12,12 @@ const { createCanvas, registerFont } = require('canvas');
 const randomstring = require('randomstring');
 const path = require('path');
 const verifySchema = require('../modals/verify-schema.js');
+const pengu = require('../modals/pengu-schema.js');
 
 const fontPath = path.join(__dirname, '../fonts/arial/arial.ttf');
 registerFont(fontPath, { family: 'Arial' });
 const Captcha = require("@haileybot/captcha-generator");
-
+const randomColor = Math.floor(Math.random() * 16777215).toString(16);
 async function generateCaptcha(type = 'pengu') {
 	if (type === 'pengu') {
 		const canvas = createCanvas(200, 80);
@@ -122,7 +123,21 @@ module.exports = {
 		}
 
 		try {
-			await command.execute(interaction);
+			// if its a economy command and the user is not in the database
+			if (command.category === 'economy') {
+				const user = await pengu.findOne({ id: interaction.user.id });
+				if (!user) {
+					const embed = new EmbedBuilder()
+                    .setTitle('You are not in the Empire!')
+                    .setDescription('You must join the Empire before you can use any commands! Run `/join` to join the Empire.')
+                    .setColor(randomColor);
+                interaction.reply({ embeds: [embed], ephemeral: true });
+				} else {
+					await command.execute(interaction);
+				}
+			} else {
+				await command.execute(interaction);
+			}
 		} catch (error) {
 			console.error(`Error executing ${interaction.commandName}`);
 			console.error(error);
