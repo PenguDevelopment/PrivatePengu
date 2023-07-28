@@ -123,7 +123,20 @@ module.exports = {
 				console.error(`No subcommand matching ${interaction.commandName}.${subCommand} was found.`);
 				return;
 			}
-			subCommandFile.execute(interaction);
+			if (subCommandFile && subCommand != 'join') {
+				const user = await pengu.findOne({ id: interaction.user.id });
+				if (!user) {
+					const embed = new EmbedBuilder()
+						.setTitle('You are not in the Empire!')
+						.setDescription('You must join the Empire before you can use any commands! Run `/join` to join the Empire.')
+						.setColor(randomColor);
+					interaction.reply({ embeds: [embed], ephemeral: true });
+				} else {
+					await subCommandFile.execute(interaction);
+				}
+			} else {
+				await subCommandFile.execute(interaction);
+			}
 		} else {
 			const command = interaction.client.commands.get(interaction.commandName);
 
