@@ -1,10 +1,6 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
 
-let data = new SlashCommandBuilder()
-    .setName('gather')
-    .setDescription('Gather supplies.');
-module.exports.data = data;
 async function execute(interaction) {
     var randomColor = Math.floor(Math.random() * 16777215).toString(16);
     const user = await pengu.findOne({ id: interaction.user.id });
@@ -231,4 +227,4 @@ async function execute(interaction) {
 ;
 
 module.exports.execute = execute;
-module.exports.category = 'economy';
+module.exports.subCommand = "economy.gather";

@@ -1,11 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
-
-const data = new SlashCommandBuilder()
-    .setName('inventory')
-    .setDescription('Check your inventory.')
-    .addUserOption(option => option.setName('user').setDescription('The user to check the inventory of.').setRequired(false));
-module.exports = { data };
 
 async function execute(interaction) {
     var randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -259,4 +253,4 @@ async function execute(interaction) {
 ;
 
 module.exports.execute = execute;
-module.exports.category = 'economy';
+module.exports.subCommand = "economy.inventory";

@@ -115,32 +115,41 @@ module.exports = {
 			}
 		}
 
-		const command = interaction.client.commands.get(interaction.commandName);
+		const subCommand = await interaction.options.getSubcommand();
 
-		if (!command) {
-			console.error(`No command matching ${interaction.commandName} was found.`);
-			return;
-		}
+		if (subCommand) {
+			const subCommandFile = await interaction.client.subCommands.get(`${interaction.commandName}.${subCommand}`);
+			if (!subCommandFile) {
+				console.error(`No subcommand matching ${interaction.commandName}.${subCommand} was found.`);
+				return;
+			}
+			subCommandFile.execute(interaction);
+		} else {
+			const command = interaction.client.commands.get(interaction.commandName);
 
-		try {
-			// if its a economy command and the user is not in the database
-			if (command.category === 'economy') {
-				const user = await pengu.findOne({ id: interaction.user.id });
-				if (!user) {
-					const embed = new EmbedBuilder()
-                    .setTitle('You are not in the Empire!')
-                    .setDescription('You must join the Empire before you can use any commands! Run `/join` to join the Empire.')
-                    .setColor(randomColor);
-                interaction.reply({ embeds: [embed], ephemeral: true });
+			if (!command) {
+				console.error(`No command matching ${interaction.commandName} was found.`);
+				return;
+			}
+			try {
+				if (command.category === 'economy') {
+					const user = await pengu.findOne({ id: interaction.user.id });
+					if (!user) {
+						const embed = new EmbedBuilder()
+						.setTitle('You are not in the Empire!')
+						.setDescription('You must join the Empire before you can use any commands! Run `/join` to join the Empire.')
+						.setColor(randomColor);
+					interaction.reply({ embeds: [embed], ephemeral: true });
+					} else {
+						await command.execute(interaction);
+					}
 				} else {
 					await command.execute(interaction);
 				}
-			} else {
-				await command.execute(interaction);
+			} catch (error) {
+				console.error(`Error executing ${interaction.commandName}`);
+				console.error(error);
 			}
-		} catch (error) {
-			console.error(`Error executing ${interaction.commandName}`);
-			console.error(error);
 		}
 	} else if (interaction.isButton() && interaction.customId.startsWith('sug-')) {
 		const id = interaction.customId.split('-')[1];

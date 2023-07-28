@@ -1,17 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
-
-const data = new SlashCommandBuilder()
-  .setName('codes')
-  .setDescription('Redeem PenguEmpire Codes.')
-  .addStringOption(option =>
-    option
-      .setName('code')
-      .setDescription('Enter the code you want to redeem.')
-      .setRequired(true)
-  );
-
-module.exports.data = data;
 
 module.exports.execute = async function execute(interaction) {
   var randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -70,4 +58,4 @@ module.exports.execute = async function execute(interaction) {
     await interaction.reply({ embeds: [notExist] });
   }
 };
-module.exports.category = 'economy';
+module.exports.subCommand = "economy.codes";

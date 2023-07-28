@@ -1,13 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
 let targetUser;
 let member;
 var page = 1;
-let data = new SlashCommandBuilder()
-    .setName('clan')
-    .setDescription('Check your clan.')
-    .addUserOption(option => option.setName('user').setDescription('The user\'s clan you want to see.'));
-module.exports.data = data;
+
 async function execute(interaction) {
     var randomColor = Math.floor(Math.random() * 16777215).toString(16);
     targetUser = interaction.options.getUser('user');
@@ -251,4 +247,4 @@ async function execute(interaction) {
 ;
 
 module.exports.execute = execute;
-module.exports.category = 'economy';
+module.exports.subCommand = "economy.clan";

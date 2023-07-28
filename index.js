@@ -19,6 +19,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds,
  ], partials: [Partials.Message, Partials.Channel, Partials.Reaction] });
 
 client.commands = new Collection();
+client.subCommands = new Collection();
 
 client.on('ready', async () => {
 	mongoose.connect(process.env.MONGO_URI, {
@@ -112,21 +113,27 @@ client.on('messageReactionRemove', async (reaction, user) => {
 	}
 })
 
-function loadCommandsFromFolder(folderName) {
+async function loadCommandsFromFolder(folderName) {
+	await client.commands.clear();
+	await client.subCommands.clear();
 	const commandFiles = fs.readdirSync(path.join(__dirname, 'commands', folderName))
 	  .filter(file => file.endsWith('.js'));
-  
 	for (const file of commandFiles) {
 	  const filePath = path.join(__dirname, 'commands', folderName, file);
 	  const command = require(filePath);
-  
-	  if ('data' in command && 'execute' in command) {
-		client.commands.set(command.data.name, command);
+
+	  if (command.subCommand) { 
+		client.subCommands.set(command.subCommand, command)
 	  } else {
-		console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+		if ('data' in command && !command.subCommand || 'execute' in command && !command.subCommand) {
+			client.commands.set(command.data.name, command);
+		} else if (!command.subCommand) {
+			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+		}
 	  }
 	}
 }
+
 loadCommandsFromFolder('economy');
 loadCommandsFromFolder('moderation');
   

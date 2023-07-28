@@ -17,9 +17,9 @@ function loadCommandsFromFolder(folderPath) {
     const filePath = path.join(folderPath, file);
     const command = require(filePath);
 
-    if ('data' in command && 'execute' in command) {
+    if ('data' in command && !command.subCommand || 'execute' in command && !command.subCommand) {
       commands.push(command.data.toJSON());
-    } else {
+    } else if (!command.subCommand) {
       console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
     }
   }

@@ -1,14 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
-
-const data = new SlashCommandBuilder()
-  .setName('edit-job')
-  .setDescription('Edit your profile')
-  .addSubcommand(subcommand =>
-    subcommand.setName('job').setDescription('Edit your job')
-  );
-
-module.exports.data = data;
 
 module.exports.execute = async function execute(interaction) {
   var randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -103,4 +94,4 @@ module.exports.execute = async function execute(interaction) {
     });
   }
 };
-module.exports.category = 'economy';
+module.exports.subCommand = "economy.edit-job";

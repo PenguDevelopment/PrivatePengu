@@ -1,23 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
-
-const data = new SlashCommandBuilder()
-  .setName('give')
-  .setDescription('Give money to another user.')
-  .addUserOption(option =>
-    option
-      .setName('user')
-      .setDescription('Enter the user you want to give money to.')
-      .setRequired(true)
-  )
-  .addIntegerOption(option =>
-    option
-      .setName('amount')
-      .setDescription('Enter the amount you want to give.')
-      .setRequired(true)
-  );
-
-module.exports.data = data;
 
 module.exports.execute = async function execute(interaction) {
   var randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -68,4 +50,4 @@ module.exports.execute = async function execute(interaction) {
     await interaction.reply({ embeds: [embed] });
   }
 };
-module.exports.category = 'economy';
+module.exports.subCommand = "economy.give";

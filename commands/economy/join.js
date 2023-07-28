@@ -1,11 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
-
-const data = new SlashCommandBuilder()
-  .setName('join')
-  .setDescription('Join the Empire.');
-
-module.exports.data = data;
 
 module.exports.execute = async function execute(interaction) {
   var randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -52,3 +46,4 @@ module.exports.execute = async function execute(interaction) {
     }).save();
   }
 };
+module.exports.subCommand = "economy.join";

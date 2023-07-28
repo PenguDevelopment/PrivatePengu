@@ -1,15 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const pengu = require('../../modals/pengu-schema.js');
-
-let data = new SlashCommandBuilder()
-  .setName("with")
-  .setDescription("Withdraw your money from your bank.")
-  .addStringOption((option) => option
-    .setName("amount")
-    .setDescription("Enter the amount you want to withdraw.")
-    .setRequired(true));
-
-module.exports.data = data;
 
 module.exports.execute = async function execute(interaction) {
   var randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -61,4 +51,4 @@ module.exports.execute = async function execute(interaction) {
     await interaction.reply({ embeds: [embed] });
   }
 };
-module.exports.category = 'economy';
+module.exports.subCommand = "economy.with";

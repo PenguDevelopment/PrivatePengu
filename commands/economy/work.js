@@ -1,9 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
-
-const data = new SlashCommandBuilder()
-  .setName('work')
-  .setDescription('Work for money');
 
 async function execute(interaction) {
     const user = await pengu.findOne({ id: interaction.user.id });
@@ -256,7 +252,6 @@ async function execute(interaction) {
     }
 }
 module.exports = {
-    data,
     execute,
   };
-  module.exports.category = 'economy';
+module.exports.subCommand = "economy.work";

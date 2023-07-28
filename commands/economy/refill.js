@@ -1,11 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
-
-let data = new SlashCommandBuilder()
-  .setName('refill')
-  .setDescription('Refill your turns once a day.');
-
-module.exports.data = data;
 
 module.exports.execute = async function execute(interaction) {
   var randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -46,4 +40,4 @@ module.exports.execute = async function execute(interaction) {
   await interaction.reply({ embeds: [embed] });
   await pengu.findOneAndUpdate({ id: interaction.user.id }, { $set: { clanturns: 10 } });
 };
-module.exports.category = 'economy';
+module.exports.subCommand = "economy.refill";

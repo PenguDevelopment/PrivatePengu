@@ -1,28 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const pengu = require('../../modals/pengu-schema.js');
-
-const data = new SlashCommandBuilder()
-  .setName('lb')
-  .setDescription('Shows the leaderboard')
-  .addStringOption(option => option
-    .setName('type')
-    .setDescription('The type of leaderboard you want to see.')
-    .setRequired(true)
-    .addChoices({ name: 'Global', value: 'global' }, { name: 'Guild', value: 'guild' }))
-  .addStringOption(option => option
-    .setName('sort')
-    .setDescription('The type of sort you want to see.')
-    .setRequired(true)
-    .addChoices(
-      { name: 'Balance', value: 'Balance' },
-      { name: 'Clan Members', value: 'members' },
-      { name: 'Leafs', value: 'Leafs' },
-      { name: 'Meat', value: 'Meat' },
-      { name: 'Fish', value: 'Fish' },
-      { name: 'Insects', value: 'Insects' }
-    ));
-
-module.exports.data = data;
 
 module.exports.execute = async function execute(interaction) {
     var randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -129,4 +106,4 @@ module.exports.execute = async function execute(interaction) {
     }
     await interaction.reply({ embeds: [embed] });
 }
-module.exports.category = 'economy';
+module.exports.subCommand = "economy.lb";
