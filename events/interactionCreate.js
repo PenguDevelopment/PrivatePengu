@@ -115,8 +115,7 @@ module.exports = {
 			}
 		}
 
-		const subCommand = await interaction.options.getSubcommand();
-
+		const subCommand = await interaction.options.getSubcommand(false)
 		if (subCommand) {
 			const subCommandFile = await interaction.client.subCommands.get(`${interaction.commandName}.${subCommand}`);
 			if (!subCommandFile) {

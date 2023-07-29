@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require("discord.js");
 
-module.exports = {
-    data: new SlashCommandBuilder()
+let data = new SlashCommandBuilder()
         .setName('economy')
         .setDescription('Economy commands.')
         .addSubcommand(subcommand => subcommand
@@ -101,5 +100,6 @@ module.exports = {
         .addSubcommand(subcommand => subcommand
             .setName('work')
             .setDescription('Work for money'))
-}
+data.usage = '/economy <subcommand>';
+module.exports.data = data;
 module.exports.category = 'economy';
